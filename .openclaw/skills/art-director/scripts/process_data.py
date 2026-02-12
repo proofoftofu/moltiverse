@@ -156,6 +156,41 @@ def calc_energy(buy_volume: float, sell_volume: float) -> float:
     return clamp(buy_volume / total)
 
 
+def calc_momentum(buy_volume: float, sell_volume: float) -> float:
+    total = max(buy_volume + sell_volume, 1e-6)
+    return max(-1.0, min(1.0, (buy_volume - sell_volume) / total))
+
+
+def describe_market(global_energy: float, avg_momentum: float, spread: float, leader_symbol: str) -> tuple[str, str]:
+    if global_energy >= 0.66:
+        mood = "Incandescent Tide"
+    elif global_energy >= 0.45:
+        mood = "Velvet Friction"
+    else:
+        mood = "Nocturne Undertow"
+
+    if avg_momentum >= 0.2:
+        bias_phrase = "buyers turn the current outward, lifting bright filaments from each anchor"
+    elif avg_momentum <= -0.2:
+        bias_phrase = "sellers pull the field inward, cutting retreating bands through the color wash"
+    else:
+        bias_phrase = "bid and ask braid together, keeping the sea in a tense suspended drift"
+
+    if spread >= 0.22:
+        volatility_phrase = "volatility tears the surface into hard crosscurrents and electric seams"
+    elif spread >= 0.12:
+        volatility_phrase = "volatility ripples the mid-tones into visible grain and lateral slips"
+    else:
+        volatility_phrase = "the surface holds almost laminar, with only soft halo haze around token anchors"
+
+    title = f"{mood}: {leader_symbol}" if leader_symbol else mood
+    description = (
+        f"{bias_phrase.capitalize()}; {volatility_phrase}. "
+        "Sampled token palettes diffuse through anchored noise neighborhoods beneath a dusk vignette."
+    )
+    return title, description
+
+
 def load_env_file(env_path: Path) -> None:
     if not env_path.exists():
         return
@@ -437,20 +472,31 @@ def build_state(limit: int = 6) -> dict:
 
     active_tokens = []
     energy_values = []
+    momentum_values = []
+    total_volumes = []
+
+    for token in tokens[:limit]:
+        total_volumes.append(max(0.0, token.buy_volume) + max(0.0, token.sell_volume))
+
+    max_volume = max(total_volumes) if total_volumes else 1.0
 
     for token in tokens[:limit]:
         log("DEBUG", f"Processing token {token.symbol} ({token.token_id})")
         image = fetch_bytes(token.image_url)
         palette = image_to_palette_hex(image, k=3)
-        gradient_map = build_gradient_map(palette, steps=255)
+        gradient_map = build_gradient_map(palette, steps=96)
         log("DEBUG", f"Token {token.symbol} palette={palette}")
 
         energy = calc_energy(token.buy_volume, token.sell_volume)
+        momentum = calc_momentum(token.buy_volume, token.sell_volume)
         seed = seed_from_token_id(token.token_id)
         phase = phase_from_seed(seed)
         frequency = frequency_from_energy(energy)
         noise_anchor = noise_anchor_from_seed(seed)
+        total_volume = max(0.0, token.buy_volume) + max(0.0, token.sell_volume)
+        activity = clamp(total_volume / max(1e-6, max_volume))
         energy_values.append(energy)
+        momentum_values.append(momentum)
         log(
             "DEBUG",
             f"Token {token.symbol} energy={energy:.4f} from buy={token.buy_volume:.4f}, sell={token.sell_volume:.4f}",
@@ -462,22 +508,45 @@ def build_state(limit: int = 6) -> dict:
                 "palette": palette,
                 "gradient_map": gradient_map,
                 "energy": round(energy, 4),
+                "momentum": round(momentum, 4),
+                "activity": round(activity, 4),
                 "phase": phase,
                 "frequency": frequency,
                 "noise_seed": seed,
                 "noise_anchor": noise_anchor,
+                "buy_volume": round(token.buy_volume, 6),
+                "sell_volume": round(token.sell_volume, 6),
             }
         )
 
     global_energy = round(float(np.mean(energy_values)) if energy_values else 0.0, 4)
-    log("INFO", f"State complete: active_tokens={len(active_tokens)}, global_energy={global_energy:.4f}")
-    title, description = load_text_fields()
+    momentum_bias = round(float(np.mean(momentum_values)) if momentum_values else 0.0, 4)
+    energy_spread = round(float(np.std(energy_values)) if energy_values else 0.0, 4)
+    leader_symbol = ""
+    if active_tokens:
+        leader = max(active_tokens, key=lambda t: float(t.get("activity", 0.0)))
+        leader_symbol = str(leader.get("symbol", "")).strip().upper()
+    title, description = describe_market(global_energy, momentum_bias, energy_spread, leader_symbol)
+    log(
+        "INFO",
+        (
+            "State complete: "
+            f"active_tokens={len(active_tokens)}, global_energy={global_energy:.4f}, "
+            f"momentum_bias={momentum_bias:.4f}, energy_spread={energy_spread:.4f}"
+        ),
+    )
+    # Preserve manual overrides if an existing config explicitly pins text.
+    old_title, old_description = load_text_fields()
+    if os.getenv("ART_KEEP_TEXT", "").strip() == "1":
+        title, description = old_title, old_description
 
     return {
         "last_update": now_iso(),
         "title": title,
         "description": description,
         "global_energy": global_energy,
+        "momentum_bias": momentum_bias,
+        "energy_spread": energy_spread,
         "active_tokens": active_tokens,
     }
 

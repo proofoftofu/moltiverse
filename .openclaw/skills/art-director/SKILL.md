@@ -21,9 +21,9 @@ Run autonomously and continuously transform Nad.fun market activity into a singl
    - `GET /agent/swap-history/:token_id`
 4. Build artwork state fields in `art-config.json`:
    - token palette and `gradient_map`
-   - `energy`, `phase`, `frequency`
+   - `energy`, `momentum`, `activity`, `phase`, `frequency`
    - `noise_seed`, `noise_anchor`
-   - `global_energy`
+   - `global_energy`, `momentum_bias`, `energy_spread`
    - `title`, `description`
 5. Persist runtime warnings/errors to `.openclaw/skills/art-director/error.log`.
 6. In agent actions, inspect recent `error.log` entries and use them to guide corrective edits.
