@@ -18,14 +18,20 @@ let flowTime = 0;
 let qualityStep = 8;
 let showOverlay = true;
 let showGuides = true;
+let hoveredTokenId = "";
 
-function canvasSide() {
-  return Math.max(300, Math.min(window.innerWidth, window.innerHeight));
+function canvasDimensions() {
+  const container = document.getElementById("canvas-container");
+  if (!container) return { w: window.innerWidth, h: window.innerHeight };
+  const w = Math.max(240, Math.floor(container.clientWidth || window.innerWidth));
+  const h = Math.max(240, Math.floor(container.clientHeight || window.innerHeight));
+  return { w, h };
 }
 
 function setup() {
   const container = document.getElementById("canvas-container");
-  const c = createCanvas(window.innerWidth, window.innerHeight);
+  const dims = canvasDimensions();
+  const c = createCanvas(dims.w, dims.h);
   c.parent(container);
   pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
   textFont("Helvetica");
@@ -35,7 +41,8 @@ function setup() {
 }
 
 function windowResized() {
-  resizeCanvas(window.innerWidth, window.innerHeight);
+  const dims = canvasDimensions();
+  resizeCanvas(dims.w, dims.h);
   background(6, 10, 20);
 }
 
@@ -338,6 +345,21 @@ function pointInCanvas(x, y) {
   return x >= 0 && x <= width && y >= 0 && y <= height;
 }
 
+function tokenHitRadius(token) {
+  return 12 + token.activity * 22 + token.energy * 8;
+}
+
+function tokenAtPoint(px, py) {
+  const tokens = liveState._tokens || [];
+  for (const token of tokens) {
+    const anchor = tokenAnchorPx(token);
+    if (Math.hypot(px - anchor.x, py - anchor.y) <= tokenHitRadius(token)) {
+      return token;
+    }
+  }
+  return null;
+}
+
 function tokenInfluenceWeights(px, py) {
   const tokens = liveState._tokens || [];
   const weights = [];
@@ -484,6 +506,10 @@ function drawDataSea(dt) {
   drawInfluenceGuides(t);
   drawDataOverlay();
   drawCuratorialText();
+
+  const hovered = pointInCanvas(mouseX, mouseY) ? tokenAtPoint(mouseX, mouseY) : null;
+  hoveredTokenId = hovered && hovered.token_id ? String(hovered.token_id) : "";
+  cursor(hoveredTokenId ? HAND : ARROW);
 }
 
 function applyGlitchSnap(energy) {
@@ -529,4 +555,12 @@ function keyPressed() {
   } else if (key === "g" || key === "G") {
     showGuides = !showGuides;
   }
+}
+
+function mousePressed() {
+  if (!pointInCanvas(mouseX, mouseY)) return;
+  const token = tokenAtPoint(mouseX, mouseY);
+  if (!token || !token.token_id) return;
+  const url = `https://nad.fun/tokens/${encodeURIComponent(String(token.token_id))}`;
+  window.open(url, "_blank", "noopener,noreferrer");
 }

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meme Art Platform</title>
     <style>
+      :root {
+        --header-h: 42px;
+      }
       html,
       body {
         margin: 0;
@@ -13,9 +16,24 @@
         height: 100%;
         overflow: hidden;
       }
+      body {
+        background: #060a12;
+      }
+      .app-header {
+        height: var(--header-h);
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        box-sizing: border-box;
+        font: 500 12px/1.2 Helvetica, Arial, sans-serif;
+        color: rgba(228, 236, 248, 0.92);
+        background: rgba(5, 9, 16, 0.92);
+        border-bottom: 1px solid rgba(160, 180, 210, 0.2);
+        letter-spacing: 0.01em;
+      }
       #canvas-container {
         width: 100vw;
-        height: 100vh;
+        height: calc(100vh - var(--header-h));
       }
       #canvas-container canvas {
         display: block;
@@ -23,6 +41,9 @@
     </style>
   </head>
   <body>
+    <header class="app-header">
+      This artwork is created by an autonomous AI agent and reflects actual market data on Nomad Fun.
+    </header>
     <div id="canvas-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
