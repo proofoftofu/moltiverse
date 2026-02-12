@@ -13,11 +13,14 @@ let lastReload = 0;
 let lastFrameAt = 0;
 let flowTime = 0;
 
+function canvasSide() {
+  return Math.max(300, Math.min(window.innerWidth * 0.64, 460));
+}
+
 function setup() {
   const container = document.getElementById("canvas-container");
-  const w = Math.min(window.innerWidth * 0.96, 1000);
-  const h = Math.max(520, Math.min(window.innerHeight * 0.78, 720));
-  const c = createCanvas(w, h);
+  const side = canvasSide();
+  const c = createCanvas(side, side);
   c.parent(container);
   pixelDensity(1);
   noStroke();
@@ -26,9 +29,8 @@ function setup() {
 }
 
 function windowResized() {
-  const w = Math.min(window.innerWidth * 0.96, 1000);
-  const h = Math.max(520, Math.min(window.innerHeight * 0.78, 720));
-  resizeCanvas(w, h);
+  const side = canvasSide();
+  resizeCanvas(side, side);
   background(6, 10, 20);
 }
 
@@ -57,7 +59,9 @@ function renderMeta() {
       "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable noise neighborhood while volatility snaps the surface into horizontal glitches.";
   }
   if (!el) return;
-  el.textContent = `energy=${Number(liveState.global_energy || 0).toFixed(2)}\nlast update=${liveState.last_update || "n/a"}\nactive tokens=${(liveState.active_tokens || []).length}`;
+  el.textContent = `Updated ${liveState.last_update || "n/a"} · Energy ${Number(liveState.global_energy || 0).toFixed(2)} · ${(
+    liveState.active_tokens || []
+  ).length} tokens`;
 }
 
 function clamp(v, lo, hi) {
