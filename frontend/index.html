@@ -111,26 +111,15 @@
         height: 78px;
         margin: 0 auto 18px;
         border-radius: 22px;
-        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-        display: flex;
-        align-items: center;
-        justify-content: center;
         box-shadow: 0 10px 30px rgba(84, 163, 255, 0.3);
         position: relative;
         overflow: hidden;
       }
-      .hero-logo::after {
-        content: "";
-        position: absolute;
-        inset: 2px;
-        background: #080e19;
-        border-radius: 20px;
-        z-index: 1;
-      }
-      .logo-icon {
-        font-size: 32px;
-        z-index: 2;
-        filter: drop-shadow(0 0 8px var(--accent-blue));
+      .hero-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
       }
       .hero-section h1 {
         margin: 0;
@@ -180,9 +169,25 @@
       }
       .modal-actions {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: center;
         align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
         padding-bottom: 4px;
+      }
+      .secondary-btn {
+        appearance: none;
+        border: 1px solid rgba(196, 217, 248, 0.45);
+        border-radius: 12px;
+        padding: 14px 28px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #e8f2ff;
+        font: 600 14px/1 Helvetica, Arial, sans-serif;
+        cursor: pointer;
+      }
+      .secondary-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
       }
       .cta-btn {
         appearance: none;
@@ -198,9 +203,11 @@
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
       }
       .cta-subtext {
+        width: 100%;
+        text-align: center;
         font: 500 12px/1.4 Helvetica, Arial, sans-serif;
         color: #475569;
-        margin-top: 12px;
+        margin-top: 4px;
       }
       @media (max-width: 880px) {
         .feature-grid {
@@ -241,7 +248,7 @@
         </div>
         <div class="modal-body">
           <section class="hero-section">
-            <div class="hero-logo" aria-hidden="true"><span class="logo-icon">✦</span></div>
+            <div class="hero-logo" aria-hidden="true"><img src="./logo.jpg" alt="Nomad Fun Autonomous Atelier logo" /></div>
             <h1>Nomad Fun Autonomous Atelier</h1>
             <p class="hero-tagline">
               Experience an autonomous canvas where agents create, trade, and evolve visual emotion from live Nomad Fun market dynamics.
@@ -259,11 +266,15 @@
               <article class="card">
                 <h3><span>🎨</span> Art-Driven Agent Interaction</h3>
                 <p>
-                  External agents can interact with the system; their participation and trades can deliberately influence specific artistic effects.
+                  External agents can participate directly, trading based on how they want to change the art in real time.
+                </p>
+                <p>
+                  This turns the canvas into community-driven art generation with token economy mechanics, a new way to interact with meme coins that feels more playful and expressive.
                 </p>
               </article>
             </div>
             <div class="modal-actions">
+              <button class="secondary-btn" id="see-token-btn" type="button">See Token</button>
               <button class="cta-btn" id="enter-canvas-btn" type="button">Launch Atelier</button>
               <p class="cta-subtext">Step into the autonomous loop.</p>
             </div>
@@ -280,8 +291,9 @@
         const openHowBtn = document.getElementById("open-how-btn");
         const closeHowBtn = document.getElementById("close-how-btn");
         const enterCanvasBtn = document.getElementById("enter-canvas-btn");
+        const seeTokenBtn = document.getElementById("see-token-btn");
 
-        if (!howModal || !openHowBtn || !closeHowBtn || !enterCanvasBtn) return;
+        if (!howModal || !openHowBtn || !closeHowBtn || !enterCanvasBtn || !seeTokenBtn) return;
 
         function openHowModal() {
           howModal.classList.add("open");
@@ -294,6 +306,9 @@
         openHowBtn.addEventListener("click", openHowModal);
         closeHowBtn.addEventListener("click", closeHowModal);
         enterCanvasBtn.addEventListener("click", closeHowModal);
+        seeTokenBtn.addEventListener("click", () => {
+          window.open("https://nad.fun/", "_blank", "noopener,noreferrer");
+        });
         howModal.addEventListener("click", (e) => {
           if (e.target === howModal) closeHowModal();
         });
