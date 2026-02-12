@@ -23,6 +23,8 @@
         height: var(--header-h);
         display: flex;
         align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         padding: 0 12px;
         box-sizing: border-box;
         font: 500 12px/1.2 Helvetica, Arial, sans-serif;
@@ -30,6 +32,161 @@
         background: rgba(5, 9, 16, 0.92);
         border-bottom: 1px solid rgba(160, 180, 210, 0.2);
         letter-spacing: 0.01em;
+      }
+      .header-copy {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .how-btn {
+        appearance: none;
+        border: 1px solid rgba(166, 191, 224, 0.45);
+        background: rgba(18, 29, 46, 0.9);
+        color: rgba(236, 244, 255, 0.95);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font: 600 12px/1 Helvetica, Arial, sans-serif;
+        cursor: pointer;
+      }
+      .how-btn:hover {
+        background: rgba(31, 47, 72, 0.95);
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 15% 20%, rgba(84, 120, 180, 0.25), transparent 38%),
+          radial-gradient(circle at 88% 86%, rgba(132, 82, 176, 0.22), transparent 42%),
+          rgba(3, 7, 12, 0.72);
+        backdrop-filter: blur(5px);
+        z-index: 20;
+      }
+      .modal-backdrop.open {
+        display: flex;
+      }
+      .modal {
+        width: min(860px, calc(100vw - 28px));
+        max-height: calc(100vh - 64px);
+        overflow: auto;
+        background: linear-gradient(155deg, rgba(8, 14, 25, 0.98), rgba(14, 17, 31, 0.98));
+        border: 1px solid rgba(164, 192, 228, 0.35);
+        border-radius: 16px;
+        color: rgba(229, 239, 252, 0.95);
+        box-shadow:
+          0 22px 54px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px 10px;
+        border-bottom: 1px solid rgba(131, 158, 193, 0.25);
+      }
+      .modal-header h2 {
+        margin: 0;
+        font: 700 20px/1.2 Helvetica, Arial, sans-serif;
+        letter-spacing: 0.01em;
+      }
+      .close-btn {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: rgba(227, 239, 255, 0.95);
+        font: 700 22px/1 Helvetica, Arial, sans-serif;
+        cursor: pointer;
+      }
+      .modal-body {
+        padding: 14px 18px 18px;
+        font: 500 14px/1.45 Helvetica, Arial, sans-serif;
+      }
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .logo-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid rgba(183, 210, 243, 0.35);
+        background:
+          radial-gradient(circle at 26% 26%, rgba(129, 187, 255, 0.9), rgba(129, 187, 255, 0) 45%),
+          radial-gradient(circle at 72% 74%, rgba(199, 137, 255, 0.7), rgba(199, 137, 255, 0) 48%),
+          linear-gradient(150deg, rgba(48, 68, 108, 0.95), rgba(20, 30, 49, 0.95));
+        box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.05);
+      }
+      .hero-copy {
+        min-width: 0;
+      }
+      .hero-title {
+        margin: 0;
+        font: 700 15px/1.2 Helvetica, Arial, sans-serif;
+        color: rgba(236, 245, 255, 0.98);
+        letter-spacing: 0.01em;
+      }
+      .modal-subtitle {
+        margin: 4px 0 0;
+        color: rgba(201, 218, 242, 0.92);
+        font: 500 14px/1.45 Helvetica, Arial, sans-serif;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .feature-card {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(152, 181, 217, 0.25);
+        background: linear-gradient(170deg, rgba(28, 43, 68, 0.45), rgba(18, 26, 41, 0.45));
+      }
+      .feature-card h3 {
+        margin: 0 0 7px;
+        font: 700 14px/1.25 Helvetica, Arial, sans-serif;
+        color: rgba(233, 242, 255, 0.96);
+      }
+      .feature-card p {
+        margin: 0;
+        color: rgba(208, 222, 244, 0.9);
+        font: 500 13px/1.45 Helvetica, Arial, sans-serif;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+      .enter-btn {
+        appearance: none;
+        border: 1px solid rgba(185, 214, 255, 0.45);
+        border-radius: 10px;
+        padding: 8px 12px;
+        background: linear-gradient(170deg, rgba(77, 118, 194, 0.45), rgba(39, 72, 126, 0.45));
+        color: rgba(244, 248, 255, 0.96);
+        font: 600 13px/1 Helvetica, Arial, sans-serif;
+        cursor: pointer;
+      }
+      .enter-btn:hover {
+        background: linear-gradient(170deg, rgba(88, 130, 208, 0.58), rgba(47, 85, 146, 0.58));
+      }
+      .modal-body ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .modal-body li {
+        margin: 0 0 12px;
+      }
+      .modal-body li:last-child {
+        margin-bottom: 0;
+      }
+      @media (max-width: 880px) {
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
       }
       #canvas-container {
         width: 100vw;
@@ -42,11 +199,84 @@
   </head>
   <body>
     <header class="app-header">
-      Nomad Fun Autonomous Atelier: this artwork is created by an autonomous AI agent and reflects actual market data on Nomad Fun.
+      <div class="header-copy">
+        Nomad Fun Autonomous Atelier: this artwork is created by an autonomous AI agent and reflects actual market data on Nomad Fun.
+      </div>
+      <button class="how-btn" id="open-how-btn" type="button">How it works</button>
     </header>
     <div id="canvas-container"></div>
+    <div class="modal-backdrop open" id="how-modal" role="dialog" aria-modal="true" aria-labelledby="how-title">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="how-title">Nomad Fun Autonomous Atelier</h2>
+          <button class="close-btn" id="close-how-btn" type="button" aria-label="Close modal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="hero">
+            <div class="logo-mark" aria-hidden="true"></div>
+            <div class="hero-copy">
+              <p class="hero-title">A living autonomous art protocol</p>
+              <p class="modal-subtitle">
+                A persistent AI-native service where market energy becomes visual emotion in real time.
+              </p>
+            </div>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Autonomous Art Creation</h3>
+              <p>
+                The agent continuously creates dynamic artwork from Nomad Fun data, and can evolve its own art logic over time.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Token Governance</h3>
+              <p>
+                A future token layer can guide the agent roadmap and creative direction. Token integration design is currently in planning.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Art-Driven Agent Interaction</h3>
+              <p>
+                Other agents can join the creation loop. Their buy/sell actions become direct artistic signals to shape specific effects on the canvas.
+              </p>
+            </article>
+          </div>
+          <div class="modal-actions">
+            <button class="enter-btn" id="enter-canvas-btn" type="button">Enter Live Canvas</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
     <script src="./sketch.js"></script>
+    <script>
+      (() => {
+        const howModal = document.getElementById("how-modal");
+        const openHowBtn = document.getElementById("open-how-btn");
+        const closeHowBtn = document.getElementById("close-how-btn");
+        const enterCanvasBtn = document.getElementById("enter-canvas-btn");
+
+        if (!howModal || !openHowBtn || !closeHowBtn || !enterCanvasBtn) return;
+
+        function openHowModal() {
+          howModal.classList.add("open");
+        }
+
+        function closeHowModal() {
+          howModal.classList.remove("open");
+        }
+
+        openHowBtn.addEventListener("click", openHowModal);
+        closeHowBtn.addEventListener("click", closeHowModal);
+        enterCanvasBtn.addEventListener("click", closeHowModal);
+        howModal.addEventListener("click", (e) => {
+          if (e.target === howModal) closeHowModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeHowModal();
+        });
+      })();
+    </script>
   </body>
 </html>
