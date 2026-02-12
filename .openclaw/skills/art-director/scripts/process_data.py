@@ -4,7 +4,6 @@ Fetch token imagery/trade data, derive palette + energy, and write art-config.js
 
 Usage:
   python3 scripts/process_data.py
-  python3 scripts/process_data.py --loop --interval 2
 """
 
 from __future__ import annotations
@@ -41,12 +40,25 @@ class TokenData:
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "art-config.json"
+ERROR_LOG_PATH = ROOT / "error.log"
 LAST_API_REQUEST_TS = 0.0
+
+
+def append_error_log(line: str) -> None:
+    try:
+        with ERROR_LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        # Avoid recursive failures if logging itself breaks.
+        pass
 
 
 def log(level: str, message: str) -> None:
     ts = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-    print(f"[{ts}] [{level}] {message}")
+    line = f"[{ts}] [{level}] {message}"
+    print(line)
+    if level == "ERROR":
+        append_error_log(line)
 
 
 def clamp(v: float, low: float = 0.0, high: float = 1.0) -> float:
@@ -468,8 +480,6 @@ def write_state(state: dict) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate live art config from trade/image data.")
-    parser.add_argument("--loop", action="store_true", help="Run forever with interval updates.")
-    parser.add_argument("--interval", type=int, default=2, help="Seconds between loop updates.")
     parser.add_argument("--limit", type=int, default=6, help="Max number of active tokens.")
     return parser.parse_args()
 
@@ -479,27 +489,14 @@ def main() -> int:
     load_env_file(ROOT.parents[2] / ".env")
     log("INFO", "Loaded environment configuration.")
 
-    if args.loop:
-        log("INFO", f"Starting stream loop with interval={max(args.interval, 1)}s")
-        while True:
-            try:
-                state = build_state(limit=args.limit)
-                write_state(state)
-                print(json.dumps(state, indent=2))
-            except Exception as e:
-                log("ERROR", f"Loop iteration failed: {e}")
-                log("ERROR", traceback.format_exc().strip())
-                return 1
-            time.sleep(max(args.interval, 1))
-    else:
-        try:
-            state = build_state(limit=args.limit)
-            write_state(state)
-            print(json.dumps(state, indent=2))
-        except Exception as e:
-            log("ERROR", f"Run failed: {e}")
-            log("ERROR", traceback.format_exc().strip())
-            return 1
+    try:
+        state = build_state(limit=args.limit)
+        write_state(state)
+        print(json.dumps(state, indent=2))
+    except Exception as e:
+        log("ERROR", f"Run failed: {e}")
+        log("ERROR", traceback.format_exc().strip())
+        return 1
     return 0
 
 
