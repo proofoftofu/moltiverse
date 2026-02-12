@@ -16,25 +16,26 @@ let lastReload = 0;
 let lastFrameAt = 0;
 let flowTime = 0;
 let qualityStep = 8;
+let showOverlay = true;
+let showGuides = true;
 
 function canvasSide() {
-  return Math.max(300, Math.min(window.innerWidth * 0.64, 460));
+  return Math.max(300, Math.min(window.innerWidth, window.innerHeight));
 }
 
 function setup() {
   const container = document.getElementById("canvas-container");
-  const side = canvasSide();
-  const c = createCanvas(side, side);
+  const c = createCanvas(window.innerWidth, window.innerHeight);
   c.parent(container);
-  pixelDensity(1);
+  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+  textFont("Helvetica");
   noStroke();
   background(6, 10, 20);
   loadConfig();
 }
 
 function windowResized() {
-  const side = canvasSide();
-  resizeCanvas(side, side);
+  resizeCanvas(window.innerWidth, window.innerHeight);
   background(6, 10, 20);
 }
 
@@ -119,17 +120,9 @@ async function loadConfig() {
 }
 
 function renderMeta() {
-  const el = document.getElementById("meta");
-  const titleEl = document.getElementById("atelier-title");
-  const descEl = document.getElementById("atelier-description");
-  if (titleEl) titleEl.textContent = liveState.title;
-  if (descEl) descEl.textContent = liveState.description;
-  if (!el) return;
-  el.textContent =
-    `Updated ${liveState.last_update || "n/a"} · ` +
-    `Energy ${liveState.global_energy.toFixed(2)} · ` +
-    `Bias ${liveState.momentum_bias.toFixed(2)} · ` +
-    `${liveState._tokens.length} tokens`;
+  if (typeof document !== "undefined") {
+    document.title = liveState.title || "Meme Art Platform";
+  }
 }
 
 function tokenAnchorPx(token) {
@@ -261,6 +254,202 @@ function drawBackdrop(t) {
   }
 }
 
+function fitTextOneLine(raw, maxWidth) {
+  const src = String(raw || "").replace(/\s+/g, " ").trim();
+  if (!src) return "";
+  if (textWidth(src) <= maxWidth) return src;
+  const ellipsis = "...";
+  let lo = 0;
+  let hi = src.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const attempt = src.slice(0, mid).trimEnd() + ellipsis;
+    if (textWidth(attempt) <= maxWidth) lo = mid;
+    else hi = mid - 1;
+  }
+  return src.slice(0, lo).trimEnd() + ellipsis;
+}
+
+function wrapAndClampText(raw, maxWidth, maxLines) {
+  const src = String(raw || "").replace(/\s+/g, " ").trim();
+  if (!src) return "";
+  const words = src.split(" ");
+  const lines = [];
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const candidate = line ? `${line} ${words[i]}` : words[i];
+    if (textWidth(candidate) <= maxWidth) {
+      line = candidate;
+      continue;
+    }
+    if (line) lines.push(line);
+    line = words[i];
+    if (lines.length === maxLines - 1) {
+      const rest = [line, ...words.slice(i + 1)].join(" ");
+      lines.push(fitTextOneLine(rest, maxWidth));
+      return lines.join("\n");
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines.slice(0, maxLines).join("\n");
+}
+
+function drawCuratorialText() {
+  const pad = 14;
+  const maxW = Math.min(width - 2 * pad, Math.max(320, width * 0.56));
+  const rawTitle = liveState.title || "Atelier of the Agent";
+  const rawDesc = liveState.description || "";
+
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+  textSize(22);
+  const title = fitTextOneLine(rawTitle, maxW - 20);
+  const titleH = Math.ceil(textAscent() + textDescent()) + 2;
+
+  textStyle(NORMAL);
+  textSize(13);
+  textLeading(18);
+  const description = wrapAndClampText(rawDesc, maxW - 20, 3);
+  const descLineCount = Math.max(1, description.split("\n").length);
+  const descH = descLineCount * 18;
+
+  const boxH = 16 + titleH + 8 + descH + 12;
+
+  const y = height - boxH - pad;
+  noStroke();
+  fill(7, 11, 20, 144);
+  rect(pad, y, maxW, boxH, 8);
+
+  fill(240, 246, 255, 235);
+  textStyle(BOLD);
+  textSize(22);
+  text(title, pad + 10, y + 8, maxW - 20, titleH + 6);
+
+  fill(210, 222, 242, 220);
+  textStyle(NORMAL);
+  textSize(13);
+  textLeading(18);
+  text(description, pad + 10, y + 8 + titleH + 8, maxW - 20, descH + 4);
+}
+
+function pointInCanvas(x, y) {
+  return x >= 0 && x <= width && y >= 0 && y <= height;
+}
+
+function tokenInfluenceWeights(px, py) {
+  const tokens = liveState._tokens || [];
+  const weights = [];
+  let wSum = 0;
+
+  for (const token of tokens) {
+    const anchor = tokenAnchorPx(token);
+    const dist = Math.max(8, Math.hypot(px - anchor.x, py - anchor.y));
+    const normDist = dist / Math.min(width, height);
+    const w = (1 / (1 + Math.pow(normDist, 1.65) * 9)) * (0.18 + token.energy * 0.7 + token.activity * 0.6);
+    weights.push(w);
+    wSum += w;
+  }
+
+  if (wSum <= 0) return tokens.map(() => 0);
+  return weights.map((w) => w / wSum);
+}
+
+function drawInfluenceGuides(t) {
+  const tokens = liveState._tokens || [];
+  if (!showGuides || tokens.length === 0) return;
+
+  const hover = pointInCanvas(mouseX, mouseY);
+  const influences = hover ? tokenInfluenceWeights(mouseX, mouseY) : [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    const anchor = tokenAnchorPx(token);
+    const hue = sampleGradientRGB(token, 0.56 + 0.2 * Math.sin(t * 0.4 + token.phase));
+    const radius = 10 + token.activity * 44 + token.energy * 18;
+
+    noFill();
+    stroke(hue[0], hue[1], hue[2], 88);
+    strokeWeight(1);
+    circle(anchor.x, anchor.y, radius);
+
+    stroke(hue[0], hue[1], hue[2], 50);
+    circle(anchor.x, anchor.y, radius * 1.6);
+
+    if (hover) {
+      const inf = influences[i] || 0;
+      stroke(hue[0], hue[1], hue[2], 25 + inf * 180);
+      line(anchor.x, anchor.y, mouseX, mouseY);
+    }
+
+    noStroke();
+    fill(235, 240, 248, 180);
+    textStyle(NORMAL);
+    textSize(10);
+    textAlign(CENTER, CENTER);
+    text(token.symbol || "?", anchor.x, anchor.y);
+  }
+}
+
+function drawMetricBar(x, y, w, h, value01, r, g, b) {
+  noStroke();
+  fill(255, 255, 255, 30);
+  rect(x, y, w, h, 2);
+  fill(r, g, b, 175);
+  rect(x, y, w * clamp(value01, 0, 1), h, 2);
+}
+
+function drawDataOverlay() {
+  if (!showOverlay) return;
+  const tokens = liveState._tokens || [];
+
+  const boxW = Math.min(width - 20, 265);
+  const rows = Math.min(4, tokens.length);
+  const boxH = 92 + rows * 16;
+  const x = 10;
+  const y = 10;
+
+  noStroke();
+  fill(8, 12, 20, 168);
+  rect(x, y, boxW, boxH, 6);
+
+  fill(236, 242, 250, 220);
+  textStyle(BOLD);
+  textSize(11);
+  textAlign(LEFT, TOP);
+  text(`Live Nad.fun feed  ${liveState.last_update || "n/a"}`, x + 8, y + 7);
+
+  textStyle(NORMAL);
+  textSize(10);
+  fill(220, 228, 242, 200);
+  text("Energy", x + 8, y + 24);
+  drawMetricBar(x + 56, y + 25, 82, 6, liveState.global_energy, 128, 209, 255);
+  text("Bias", x + 144, y + 24);
+  drawMetricBar(x + 171, y + 25, 82, 6, liveState.momentum_bias * 0.5 + 0.5, 255, 176, 136);
+  text("Spread", x + 8, y + 36);
+  drawMetricBar(x + 56, y + 37, 82, 6, liveState.energy_spread, 255, 132, 180);
+
+  let yy = y + 52;
+  const ranked = tokens
+    .map((t) => ({ t }))
+    .sort((a, b) => b.t.activity - a.t.activity)
+    .slice(0, rows);
+
+  for (const row of ranked) {
+    const token = row.t;
+    const c = sampleGradientRGB(token, 0.58);
+    const momentumArrow = token.momentum >= 0 ? "CW" : "CCW";
+    const summary = `${token.symbol || "?"}  E:${token.energy.toFixed(2)}  M:${token.momentum.toFixed(2)} ${momentumArrow}  A:${token.activity.toFixed(2)}`;
+    fill(c[0], c[1], c[2], 220);
+    text(fitTextOneLine(summary, boxW - 16), x + 8, yy);
+    yy += 16;
+  }
+
+  fill(170, 188, 214, 190);
+  text("Toggle: O overlay, G guides", x + 8, y + boxH - 14);
+}
+
 function drawDataSea(dt) {
   const energy = liveState.global_energy;
   const targetStep = 7 + Math.floor((1 - energy) * 2 + liveState.energy_spread * 4);
@@ -291,6 +480,10 @@ function drawDataSea(dt) {
   if (Math.random() < 0.08 + energy * 0.36 + liveState.energy_spread * 0.25) {
     applyGlitchSnap(energy);
   }
+
+  drawInfluenceGuides(t);
+  drawDataOverlay();
+  drawCuratorialText();
 }
 
 function applyGlitchSnap(energy) {
@@ -328,4 +521,12 @@ function draw() {
   flowTime += dt;
 
   drawDataSea(dt);
+}
+
+function keyPressed() {
+  if (key === "o" || key === "O") {
+    showOverlay = !showOverlay;
+  } else if (key === "g" || key === "G") {
+    showGuides = !showGuides;
+  }
 }
