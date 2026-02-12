@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import time
 import traceback
 from dataclasses import dataclass
@@ -25,7 +26,6 @@ from typing import List
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
-import re
 
 import numpy as np
 from PIL import Image
@@ -43,6 +43,7 @@ class TokenData:
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "art-config.json"
+LAST_API_REQUEST_TS = 0.0
 
 
 def log(level: str, message: str) -> None:
@@ -128,46 +129,104 @@ def fetch_text(url: str, timeout_sec: int = 12) -> str:
 
 
 def build_api_url(path: str, query: dict | None = None) -> str:
-    network = os.getenv("NAD_NETWORK", "mainnet").strip().lower()
-    base = "https://api.nadapp.net" if network == "mainnet" else "https://dev-api.nad.fun"
+    base = "https://api.nadapp.net"
     url = f"{base}{path}"
     if query:
         url = f"{url}?{urlencode(query)}"
     return url
 
 
+def api_min_interval_sec() -> float:
+    configured = os.getenv("NAD_API_MIN_INTERVAL_MS", "").strip()
+    if configured:
+        try:
+            return max(0.0, float(configured) / 1000.0)
+        except ValueError:
+            log("WARN", f"Invalid NAD_API_MIN_INTERVAL_MS={configured!r}; using defaults.")
+    return 6.5
+
+
+def wait_before_api_request() -> None:
+    global LAST_API_REQUEST_TS
+    min_interval = api_min_interval_sec()
+    elapsed = time.time() - LAST_API_REQUEST_TS
+    wait_s = min_interval - elapsed
+    if wait_s > 0:
+        log("DEBUG", f"Rate-limit pacing sleep {wait_s:.2f}s before API request")
+        time.sleep(wait_s)
+
+
+def mark_api_request_time() -> None:
+    global LAST_API_REQUEST_TS
+    LAST_API_REQUEST_TS = time.time()
+
+
+def parse_retry_after_seconds(http_error: HTTPError) -> float:
+    header_val = ""
+    try:
+        header_val = str(http_error.headers.get("Retry-After", "")).strip()
+    except Exception:
+        header_val = ""
+    if header_val.isdigit():
+        return max(0.0, float(header_val))
+
+    try:
+        body = http_error.read().decode("utf-8")
+        payload = json.loads(body) if body else {}
+        retry_after = payload.get("retry_after")
+        if retry_after is not None:
+            return max(0.0, float(retry_after))
+    except Exception:
+        return 0.0
+    return 0.0
+
+
 def api_headers() -> dict:
-    headers = {"User-Agent": "meme-art-platform/1.0", "Accept": "application/json"}
-    api_key = os.getenv("NAD_API_KEY", "").strip()
-    if api_key:
-        headers["X-API-Key"] = api_key
-    return headers
+    return {"User-Agent": "meme-art-platform/1.0", "Accept": "application/json"}
 
 
 def api_get_json(path: str, query: dict | None = None, timeout_sec: int = 15) -> dict:
     url = build_api_url(path, query=query)
-    log("DEBUG", f"API GET {url}")
-    req = Request(url, headers=api_headers())
-    try:
-        with urlopen(req, timeout=timeout_sec) as resp:  # nosec B310
-            raw = resp.read().decode("utf-8")
-        log("DEBUG", f"API OK {path} (bytes={len(raw)})")
-        return json.loads(raw) if raw else {}
-    except HTTPError as e:
-        log("WARN", f"API HTTPError {path}: status={getattr(e, 'code', 'unknown')}")
-        return {}
-    except URLError as e:
-        log("WARN", f"API URLError {path}: {e}")
-        return {}
-    except TimeoutError:
-        log("WARN", f"API timeout {path}")
-        return {}
-    except json.JSONDecodeError:
-        log("WARN", f"API invalid JSON {path}")
-        return {}
-    except Exception as e:
-        log("WARN", f"API unknown error {path}: {e}")
-        return {}
+    max_retries = max(0, int(os.getenv("NAD_API_MAX_RETRIES", "2")))
+    attempt = 0
+    while True:
+        attempt += 1
+        wait_before_api_request()
+        log("DEBUG", f"API GET {url} (attempt={attempt})")
+        req = Request(url, headers=api_headers())
+        try:
+            with urlopen(req, timeout=timeout_sec) as resp:  # nosec B310
+                raw = resp.read().decode("utf-8")
+            mark_api_request_time()
+            log("DEBUG", f"API OK {path} (bytes={len(raw)})")
+            return json.loads(raw) if raw else {}
+        except HTTPError as e:
+            mark_api_request_time()
+            status = getattr(e, "code", "unknown")
+            log("WARN", f"API HTTPError {path}: status={status}")
+            if int(status) == 429 and attempt <= max_retries:
+                retry_after = parse_retry_after_seconds(e)
+                backoff = retry_after if retry_after > 0 else min(20.0, 1.5 * (2 ** (attempt - 1)))
+                log("WARN", f"429 on {path}; sleeping {backoff:.2f}s then retrying")
+                time.sleep(backoff)
+                continue
+            return {}
+        except URLError as e:
+            mark_api_request_time()
+            log("WARN", f"API URLError {path}: {e}")
+            return {}
+        except TimeoutError:
+            mark_api_request_time()
+            log("WARN", f"API timeout {path}")
+            return {}
+        except json.JSONDecodeError:
+            mark_api_request_time()
+            log("WARN", f"API invalid JSON {path}")
+            return {}
+        except Exception as e:
+            mark_api_request_time()
+            log("WARN", f"API unknown error {path}: {e}")
+            return {}
 
 
 def validate_http_url(url: str) -> bool:
@@ -205,7 +264,7 @@ def fetch_trending_token_ids(limit: int = 8) -> List[str]:
     return out
 
 
-def fetch_nad_tokens() -> List[TokenData]:
+def fetch_nad_tokens(target_limit: int = 6) -> List[TokenData]:
     token_ids = [x.strip() for x in os.getenv("NAD_TOKEN_IDS", "").split(",") if x.strip()]
     account_id = os.getenv("NAD_ACCOUNT_ID", "").strip()
     trending_limit = int(os.getenv("NAD_TRENDING_LIMIT", "8"))
@@ -231,13 +290,24 @@ def fetch_nad_tokens() -> List[TokenData]:
         log("INFO", f"Loaded {len(token_ids)} token ids from account-created tokens.")
 
     live_tokens: List[TokenData] = []
-    log("INFO", f"Building live token list from {len(token_ids)} token ids.")
+    log("INFO", f"Building live token list from {len(token_ids)} token ids (target={target_limit}).")
     for token_id in token_ids:
+        if len(live_tokens) >= max(1, target_limit):
+            log("INFO", f"Reached target token count={target_limit}; stopping API fetch loop early.")
+            break
+
         log("DEBUG", f"Resolving token metadata for token_id={token_id}")
         token_resp = api_get_json(f"/agent/token/{token_id}")
+        if not token_resp:
+            log("WARN", f"Token metadata request failed for token_id={token_id}; skipping.")
+            continue
         token_info = token_resp.get("token_info", {}) if isinstance(token_resp, dict) else {}
         symbol = str(token_info.get("symbol", token_id)).strip().upper() or token_id
         image_uri = str(token_info.get("image_uri", "")).strip()
+
+        if not validate_http_url(image_uri):
+            log("WARN", f"Token {symbol}: missing/invalid image_uri from token info; skipping swap call.")
+            continue
 
         log("DEBUG", f"Fetching swap history for token_id={token_id}")
         swaps_resp = api_get_json(
@@ -260,22 +330,19 @@ def fetch_nad_tokens() -> List[TokenData]:
             elif "SELL" in event_type:
                 sell_volume += amount
 
-        if validate_http_url(image_uri):
-            log(
-                "INFO",
-                f"Token {symbol}: image ok, swaps={len(swaps)}, buy={buy_volume:.4f}, sell={sell_volume:.4f}",
+        log(
+            "INFO",
+            f"Token {symbol}: image ok, swaps={len(swaps)}, buy={buy_volume:.4f}, sell={sell_volume:.4f}",
+        )
+        live_tokens.append(
+            TokenData(
+                token_id=token_id,
+                symbol=symbol,
+                image_url=image_uri,
+                buy_volume=buy_volume,
+                sell_volume=sell_volume,
             )
-            live_tokens.append(
-                TokenData(
-                    token_id=token_id,
-                    symbol=symbol,
-                    image_url=image_uri,
-                    buy_volume=buy_volume,
-                    sell_volume=sell_volume,
-                )
-            )
-        else:
-            log("WARN", f"Token {symbol}: missing/invalid image_uri, skipping.")
+        )
 
     if live_tokens:
         log("INFO", f"Using {len(live_tokens)} live tokens from Nad API.")
@@ -314,7 +381,7 @@ def fallback_tokens() -> List[TokenData]:
 
 def build_state(style: str, limit: int = 6) -> dict:
     log("INFO", f"Building art state (style={style}, limit={limit})")
-    tokens = fetch_nad_tokens()
+    tokens = fetch_nad_tokens(target_limit=limit)
     if not tokens:
         tokens = fallback_tokens()
 

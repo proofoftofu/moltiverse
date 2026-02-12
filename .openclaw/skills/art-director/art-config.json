@@ -1,35 +1,77 @@
 {
-  "last_update": "2026-02-12T20:11:50Z",
+  "last_update": "2026-02-12T20:29:32Z",
   "style": "pixel-clusters",
-  "global_energy": 0.6865,
+  "global_energy": 0.5265,
   "active_tokens": [
     {
-      "symbol": "PEPE",
+      "symbol": "CHOG",
       "palette": [
-        "#E5EAE9",
-        "#383813",
-        "#8C825A"
+        "#6950FA",
+        "#5534A2",
+        "#E5DDC4"
       ],
       "coordinates": {
-        "x": 581,
-        "y": 569
+        "x": 248,
+        "y": 448
       },
-      "size": 52,
-      "energy": 0.5437
+      "size": 41,
+      "energy": 0.3526
     },
     {
-      "symbol": "DOGE",
+      "symbol": "MONCOCK",
       "palette": [
-        "#E4DEDB",
-        "#ABA9A3",
-        "#505854"
+        "#FCFCFC",
+        "#7A4E80",
+        "#B97EA5"
       ],
       "coordinates": {
-        "x": 666,
-        "y": 568
+        "x": 831,
+        "y": 517
       },
-      "size": 69,
-      "energy": 0.8293
+      "size": 54,
+      "energy": 0.5705
+    },
+    {
+      "symbol": "MOTION",
+      "palette": [
+        "#0B0B31",
+        "#4946DE",
+        "#8979F6"
+      ],
+      "coordinates": {
+        "x": 671,
+        "y": 62
+      },
+      "size": 76,
+      "energy": 0.9458
+    },
+    {
+      "symbol": "MMO",
+      "palette": [
+        "#205242",
+        "#857244",
+        "#E6A443"
+      ],
+      "coordinates": {
+        "x": 89,
+        "y": 335
+      },
+      "size": 43,
+      "energy": 0.3885
+    },
+    {
+      "symbol": "EMO",
+      "palette": [
+        "#020102",
+        "#4C3153",
+        "#DBDADB"
+      ],
+      "coordinates": {
+        "x": 640,
+        "y": 104
+      },
+      "size": 42,
+      "energy": 0.3749
     }
   ]
 }

@@ -31,11 +31,7 @@ source .venv/bin/activate
 pip install pillow scikit-learn numpy
 ```
 
-3. Fill in `.env` values.
-   - Set `NAD_NETWORK=mainnet` (or `testnet`).
-   - By default, token IDs are auto-discovered from `https://nad.fun` Trending cards.
-   - Optional override: set `NAD_TOKEN_IDS` (comma-separated), or set `NAD_ACCOUNT_ID` as fallback source.
-   - Set `NAD_API_KEY` for higher rate limits.
+3. `.env` is optional. Mainnet is hardcoded in the script (`https://api.nadapp.net`).
 
 ## Run
 
