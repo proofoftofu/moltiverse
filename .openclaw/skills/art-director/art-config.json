@@ -1,7 +1,7 @@
 {
-  "last_update": "2026-02-12T20:29:32Z",
+  "last_update": "2026-02-12T20:33:44Z",
   "style": "pixel-clusters",
-  "global_energy": 0.5265,
+  "global_energy": 0.5163,
   "active_tokens": [
     {
       "symbol": "CHOG",
@@ -14,8 +14,8 @@
         "x": 248,
         "y": 448
       },
-      "size": 41,
-      "energy": 0.3526
+      "size": 42,
+      "energy": 0.369
     },
     {
       "symbol": "MONCOCK",
@@ -28,8 +28,8 @@
         "x": 831,
         "y": 517
       },
-      "size": 54,
-      "energy": 0.5705
+      "size": 61,
+      "energy": 0.6873
     },
     {
       "symbol": "MOTION",
@@ -72,6 +72,34 @@
       },
       "size": 42,
       "energy": 0.3749
+    },
+    {
+      "symbol": "AMONG",
+      "palette": [
+        "#130F35",
+        "#774D42",
+        "#BFBAB8"
+      ],
+      "coordinates": {
+        "x": 875,
+        "y": 315
+      },
+      "size": 50,
+      "energy": 0.5061
+    },
+    {
+      "symbol": "CLAWPOT",
+      "palette": [
+        "#B4D3F9",
+        "#613892",
+        "#FAAD13"
+      ],
+      "coordinates": {
+        "x": 741,
+        "y": 496
+      },
+      "size": 40,
+      "energy": 0.3425
     }
   ]
 }

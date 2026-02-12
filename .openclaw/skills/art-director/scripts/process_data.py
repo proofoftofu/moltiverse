@@ -14,7 +14,6 @@ import argparse
 import hashlib
 import json
 import os
-import random
 import re
 import time
 import traceback
@@ -347,56 +346,23 @@ def fetch_nad_tokens(target_limit: int = 6) -> List[TokenData]:
     if live_tokens:
         log("INFO", f"Using {len(live_tokens)} live tokens from Nad API.")
         return live_tokens
-
-    sample = os.getenv("NAD_SAMPLE_IMAGE_URL", "").strip()
-    if sample and validate_http_url(sample):
-        log("WARN", "No live tokens available. Falling back to NAD_SAMPLE_IMAGE_URL.")
-        return [
-            TokenData(
-                token_id=os.getenv("NAD_SAMPLE_TOKEN_ID", "sample-pepe").strip() or "sample-pepe",
-                symbol=os.getenv("NAD_SAMPLE_SYMBOL", "PEPE").strip().upper() or "PEPE",
-                image_url=sample,
-                buy_volume=float(os.getenv("NAD_SAMPLE_BUY_VOLUME", "1200")),
-                sell_volume=float(os.getenv("NAD_SAMPLE_SELL_VOLUME", "400")),
-            )
-        ]
-    log("WARN", "No live or sample token data available.")
-    return []
-
-
-def fallback_tokens() -> List[TokenData]:
-    base = [
-        ("PEPE", "https://picsum.photos/seed/pepe/128/128"),
-        ("DOGE", "https://picsum.photos/seed/doge/128/128"),
-        ("WEN", "https://picsum.photos/seed/wen/128/128"),
-    ]
-    out: List[TokenData] = []
-    for idx, (sym, url) in enumerate(base, start=1):
-        buy = random.uniform(500, 5000)
-        sell = random.uniform(500, 5000)
-        out.append(TokenData(f"fallback-{idx}", sym, url, buy, sell))
-    log("WARN", f"Using synthetic fallback tokens: {', '.join(x.symbol for x in out)}")
-    return out
+    raise RuntimeError("No live tokens available from Nad API.")
 
 
 def build_state(style: str, limit: int = 6) -> dict:
     log("INFO", f"Building art state (style={style}, limit={limit})")
     tokens = fetch_nad_tokens(target_limit=limit)
     if not tokens:
-        tokens = fallback_tokens()
+        raise RuntimeError("No tokens to process.")
 
     active_tokens = []
     energy_values = []
 
     for token in tokens[:limit]:
-        try:
-            log("DEBUG", f"Processing token {token.symbol} ({token.token_id})")
-            image = fetch_bytes(token.image_url)
-            palette = image_to_palette_hex(image, k=3)
-            log("DEBUG", f"Token {token.symbol} palette={palette}")
-        except Exception:
-            log("WARN", f"Palette extraction failed for {token.symbol}; using default palette.")
-            palette = ["#1E1E1E", "#7A7A7A", "#F5F5F5"]
+        log("DEBUG", f"Processing token {token.symbol} ({token.token_id})")
+        image = fetch_bytes(token.image_url)
+        palette = image_to_palette_hex(image, k=3)
+        log("DEBUG", f"Token {token.symbol} palette={palette}")
 
         energy = calc_energy(token.buy_volume, token.sell_volume)
         energy_values.append(energy)
@@ -464,6 +430,7 @@ def main() -> int:
             except Exception as e:
                 log("ERROR", f"Loop iteration failed: {e}")
                 log("ERROR", traceback.format_exc().strip())
+                return 1
             time.sleep(max(args.interval, 1))
     else:
         try:
