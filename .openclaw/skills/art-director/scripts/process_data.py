@@ -60,17 +60,16 @@ def now_iso() -> str:
 
 def normalize_style(style: str | None) -> str:
     if not style:
-        return "pixel-clusters"
+        return "data-sea"
     s = style.strip().lower()
-    mapping = {"pixel": "pixel-clusters", "voronoi": "voronoi", "minimal": "minimal"}
+    mapping = {
+        "pixel": "pixel-clusters",
+        "voronoi": "voronoi",
+        "minimal": "minimal",
+        "data-sea": "data-sea",
+        "sea": "data-sea",
+    }
     return mapping.get(s, s)
-
-
-def stable_coordinates(symbol: str, width: int = 960, height: int = 640) -> dict:
-    digest = hashlib.md5(symbol.encode("utf-8")).hexdigest()
-    sx = int(digest[:8], 16)
-    sy = int(digest[8:16], 16)
-    return {"x": 40 + (sx % (width - 80)), "y": 40 + (sy % (height - 80))}
 
 
 def image_to_palette_hex(image_bytes: bytes, k: int = 3) -> List[str]:
@@ -86,6 +85,64 @@ def image_to_palette_hex(image_bytes: bytes, k: int = 3) -> List[str]:
     counts = np.bincount(model.labels_, minlength=k)
     ordered = centers[np.argsort(counts)[::-1]]
     return [f"#{r:02X}{g:02X}{b:02X}" for r, g, b in ordered]
+
+
+def hex_to_rgb(value: str) -> tuple[int, int, int]:
+    h = value.lstrip("#")
+    if len(h) != 6:
+        raise ValueError(f"Invalid hex color: {value}")
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
+
+def rgb_to_hex(r: float, g: float, b: float) -> str:
+    rr = max(0, min(255, int(round(r))))
+    gg = max(0, min(255, int(round(g))))
+    bb = max(0, min(255, int(round(b))))
+    return f"#{rr:02X}{gg:02X}{bb:02X}"
+
+
+def build_gradient_map(palette: List[str], steps: int = 255) -> List[str]:
+    if len(palette) < 3:
+        raise ValueError("Palette must have at least 3 colors for gradient map.")
+    c0 = hex_to_rgb(palette[0])
+    c1 = hex_to_rgb(palette[1])
+    c2 = hex_to_rgb(palette[2])
+    out: List[str] = []
+    for i in range(max(1, steps)):
+        t = 0.0 if steps <= 1 else i / (steps - 1)
+        if t < 0.5:
+            local = t * 2.0
+            r = c0[0] + (c1[0] - c0[0]) * local
+            g = c0[1] + (c1[1] - c0[1]) * local
+            b = c0[2] + (c1[2] - c0[2]) * local
+        else:
+            local = (t - 0.5) * 2.0
+            r = c1[0] + (c2[0] - c1[0]) * local
+            g = c1[1] + (c2[1] - c1[1]) * local
+            b = c1[2] + (c2[2] - c1[2]) * local
+        out.append(rgb_to_hex(r, g, b))
+    return out
+
+
+def seed_from_token_id(token_id: str) -> int:
+    digest = hashlib.sha256(token_id.encode("utf-8")).hexdigest()
+    return int(digest[:12], 16)
+
+
+def phase_from_seed(seed: int) -> float:
+    return round((seed % 100000) / 100000.0 * (2.0 * np.pi), 6)
+
+
+def frequency_from_energy(energy: float) -> float:
+    # Higher energy => faster oscillation.
+    return round(0.18 + energy * 1.45, 6)
+
+
+def noise_anchor_from_seed(seed: int) -> dict:
+    # Stable neighborhood in normalized noise-space (0..1, 0..1).
+    u = ((seed >> 8) % 10000) / 9999.0
+    v = ((seed >> 24) % 10000) / 9999.0
+    return {"u": round(u, 6), "v": round(v, 6)}
 
 
 def calc_energy(buy_volume: float, sell_volume: float) -> float:
@@ -362,23 +419,30 @@ def build_state(style: str, limit: int = 6) -> dict:
         log("DEBUG", f"Processing token {token.symbol} ({token.token_id})")
         image = fetch_bytes(token.image_url)
         palette = image_to_palette_hex(image, k=3)
+        gradient_map = build_gradient_map(palette, steps=255)
         log("DEBUG", f"Token {token.symbol} palette={palette}")
 
         energy = calc_energy(token.buy_volume, token.sell_volume)
+        seed = seed_from_token_id(token.token_id)
+        phase = phase_from_seed(seed)
+        frequency = frequency_from_energy(energy)
+        noise_anchor = noise_anchor_from_seed(seed)
         energy_values.append(energy)
         log(
             "DEBUG",
             f"Token {token.symbol} energy={energy:.4f} from buy={token.buy_volume:.4f}, sell={token.sell_volume:.4f}",
         )
-
-        size = int(20 + energy * 60)
         active_tokens.append(
             {
+                "token_id": token.token_id,
                 "symbol": token.symbol,
                 "palette": palette,
-                "coordinates": stable_coordinates(token.symbol),
-                "size": size,
+                "gradient_map": gradient_map,
                 "energy": round(energy, 4),
+                "phase": phase,
+                "frequency": frequency,
+                "noise_seed": seed,
+                "noise_anchor": noise_anchor,
             }
         )
 
