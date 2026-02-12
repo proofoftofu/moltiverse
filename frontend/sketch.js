@@ -3,7 +3,8 @@ const REFRESH_MS = 2000;
 
 let liveState = {
   last_update: "",
-  style: "data-sea",
+  title: "Atelier of the Agent",
+  description: "A live pigment sea shaped by Nad.fun trade pressure.",
   global_energy: 0,
   active_tokens: [],
 };
@@ -47,8 +48,16 @@ async function loadConfig() {
 
 function renderMeta() {
   const el = document.getElementById("meta");
+  const titleEl = document.getElementById("atelier-title");
+  const descEl = document.getElementById("atelier-description");
+  if (titleEl) titleEl.textContent = liveState.title || "Atelier of the Agent";
+  if (descEl) {
+    descEl.textContent =
+      liveState.description ||
+      "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable noise neighborhood while volatility snaps the surface into horizontal glitches.";
+  }
   if (!el) return;
-  el.textContent = `style=${liveState.style || "data-sea"} | energy=${Number(liveState.global_energy || 0).toFixed(2)} | ${liveState.last_update || "n/a"}`;
+  el.textContent = `energy=${Number(liveState.global_energy || 0).toFixed(2)}\nlast update=${liveState.last_update || "n/a"}\nactive tokens=${(liveState.active_tokens || []).length}`;
 }
 
 function clamp(v, lo, hi) {
@@ -213,4 +222,3 @@ function draw() {
 
   drawDataSea(dt);
 }
-

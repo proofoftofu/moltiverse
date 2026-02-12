@@ -5,7 +5,6 @@ Fetch token imagery/trade data, derive palette + energy, and write art-config.js
 Usage:
   python3 scripts/process_data.py
   python3 scripts/process_data.py --loop --interval 2
-  python3 scripts/process_data.py --style voronoi
 """
 
 from __future__ import annotations
@@ -56,20 +55,6 @@ def clamp(v: float, low: float = 0.0, high: float = 1.0) -> float:
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
-def normalize_style(style: str | None) -> str:
-    if not style:
-        return "data-sea"
-    s = style.strip().lower()
-    mapping = {
-        "pixel": "pixel-clusters",
-        "voronoi": "voronoi",
-        "minimal": "minimal",
-        "data-sea": "data-sea",
-        "sea": "data-sea",
-    }
-    return mapping.get(s, s)
 
 
 def image_to_palette_hex(image_bytes: bytes, k: int = 3) -> List[str]:
@@ -406,8 +391,25 @@ def fetch_nad_tokens(target_limit: int = 6) -> List[TokenData]:
     raise RuntimeError("No live tokens available from Nad API.")
 
 
-def build_state(style: str, limit: int = 6) -> dict:
-    log("INFO", f"Building art state (style={style}, limit={limit})")
+def load_text_fields() -> tuple[str, str]:
+    default_title = "Atelier of the Agent"
+    default_description = (
+        "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable "
+        "noise neighborhood while volatility snaps the surface into horizontal glitches."
+    )
+    if not CONFIG_PATH.exists():
+        return default_title, default_description
+    try:
+        existing = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        title = str(existing.get("title", default_title)).strip() or default_title
+        description = str(existing.get("description", default_description)).strip() or default_description
+        return title, description
+    except Exception:
+        return default_title, default_description
+
+
+def build_state(limit: int = 6) -> dict:
+    log("INFO", f"Building art state (limit={limit})")
     tokens = fetch_nad_tokens(target_limit=limit)
     if not tokens:
         raise RuntimeError("No tokens to process.")
@@ -448,10 +450,12 @@ def build_state(style: str, limit: int = 6) -> dict:
 
     global_energy = round(float(np.mean(energy_values)) if energy_values else 0.0, 4)
     log("INFO", f"State complete: active_tokens={len(active_tokens)}, global_energy={global_energy:.4f}")
+    title, description = load_text_fields()
 
     return {
         "last_update": now_iso(),
-        "style": normalize_style(style),
+        "title": title,
+        "description": description,
         "global_energy": global_energy,
         "active_tokens": active_tokens,
     }
@@ -466,7 +470,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate live art config from trade/image data.")
     parser.add_argument("--loop", action="store_true", help="Run forever with interval updates.")
     parser.add_argument("--interval", type=int, default=2, help="Seconds between loop updates.")
-    parser.add_argument("--style", type=str, default="", help="Override style name.")
     parser.add_argument("--limit", type=int, default=6, help="Max number of active tokens.")
     return parser.parse_args()
 
@@ -476,19 +479,11 @@ def main() -> int:
     load_env_file(ROOT.parents[2] / ".env")
     log("INFO", "Loaded environment configuration.")
 
-    style = args.style
-    if not style and CONFIG_PATH.exists():
-        try:
-            existing = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-            style = str(existing.get("style", "pixel-clusters"))
-        except Exception:
-            style = "pixel-clusters"
-
     if args.loop:
         log("INFO", f"Starting stream loop with interval={max(args.interval, 1)}s")
         while True:
             try:
-                state = build_state(style=style or "pixel-clusters", limit=args.limit)
+                state = build_state(limit=args.limit)
                 write_state(state)
                 print(json.dumps(state, indent=2))
             except Exception as e:
@@ -498,7 +493,7 @@ def main() -> int:
             time.sleep(max(args.interval, 1))
     else:
         try:
-            state = build_state(style=style or "pixel-clusters", limit=args.limit)
+            state = build_state(limit=args.limit)
             write_state(state)
             print(json.dumps(state, indent=2))
         except Exception as e:

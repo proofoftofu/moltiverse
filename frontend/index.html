@@ -6,50 +6,113 @@
     <title>Meme Art Platform</title>
     <style>
       :root {
-        --bg0: #0a1420;
-        --bg1: #12263d;
-        --fg: #f2f5f7;
+        --paper: #efe8db;
+        --ink: #1f1a15;
+        --ink-soft: #5a5249;
+        --frame: #2f3e57;
+        --metal: #bca77f;
       }
       html,
       body {
         margin: 0;
         padding: 0;
         min-height: 100%;
-        color: var(--fg);
-        background: radial-gradient(1200px 700px at 20% 10%, #194368, var(--bg0));
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-          "Courier New", monospace;
+        color: var(--ink);
+        background:
+          radial-gradient(1300px 700px at 20% 15%, #f5f0e7 0%, transparent 60%),
+          radial-gradient(900px 600px at 85% 70%, #d3e0f0 0%, transparent 58%),
+          linear-gradient(165deg, #e7ddcb 0%, #d8ceb8 100%);
+        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       }
       main {
-        width: min(1000px, 96vw);
-        margin: 12px auto;
+        width: min(1120px, 95vw);
+        margin: 24px auto;
       }
-      .hud {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        font-size: 13px;
-        opacity: 0.9;
+      .atelier-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+      .title-wrap h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 0.94;
+        letter-spacing: 0.01em;
+      }
+      .title-wrap p {
+        margin: 10px 0 0;
+        max-width: 70ch;
+        color: var(--ink-soft);
+        font-size: clamp(15px, 1.9vw, 18px);
+      }
+      .meta-board {
+        align-self: start;
+        background: rgba(255, 255, 255, 0.45);
+        border: 1px solid rgba(47, 62, 87, 0.25);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #374052;
+        min-width: 190px;
+      }
+      .studio {
+        position: relative;
+        background: linear-gradient(145deg, #2a3447, #202636);
+        border: 2px solid var(--metal);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 30px 70px rgba(28, 33, 45, 0.32);
+      }
+      .studio::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 1px solid rgba(188, 167, 127, 0.35);
+        border-radius: 12px;
+        pointer-events: none;
       }
       #canvas-container canvas {
         width: 100%;
         height: auto;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        border-radius: 12px;
+        border: 1px solid rgba(188, 167, 127, 0.45);
+        border-radius: 8px;
+        display: block;
+      }
+      .studio-note {
+        margin-top: 10px;
+        color: #cabfa8;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      @media (max-width: 900px) {
+        .atelier-head {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <main>
-      <div class="hud">
-        <div>Meme Art Platform</div>
-        <div id="meta">Loading state...</div>
+      <section class="atelier-head">
+        <div class="title-wrap">
+          <h1 id="atelier-title">Atelier of the Agent</h1>
+          <p id="atelier-description">Loading scene note...</p>
+        </div>
+        <aside class="meta-board" id="meta">Loading state...</aside>
+      </section>
+      <section class="studio">
+        <div id="canvas-container"></div>
+        <div class="studio-note">Continuous render from live token energy and palette diffusion</div>
+      </section>
+      <div style="height: 8px"></div>
+      <div style="font-size: 12px; color: #6a6259; letter-spacing: 0.03em">
+        AGENT WORKBENCH / NAD SIGNAL-TO-PIGMENT ENGINE
       </div>
-      <div id="canvas-container"></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
     <script src="./sketch.js"></script>
   </body>
 </html>
-
