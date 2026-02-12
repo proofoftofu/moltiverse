@@ -206,7 +206,7 @@ def fetch_bytes(url: str, timeout_sec: int = 12) -> bytes:
     log("DEBUG", f"Fetching bytes: {url}")
     req = Request(
         url,
-        headers={"User-Agent": "meme-art-platform/1.0", "Accept": "image/*,*/*;q=0.8"},
+        headers={"User-Agent": "nomad-fun-autonomous-atelier/1.0", "Accept": "image/*,*/*;q=0.8"},
     )
     with urlopen(req, timeout=timeout_sec) as resp:  # nosec B310
         return resp.read()
@@ -217,7 +217,7 @@ def fetch_text(url: str, timeout_sec: int = 12) -> str:
     req = Request(
         url,
         headers={
-            "User-Agent": "meme-art-platform/1.0",
+            "User-Agent": "nomad-fun-autonomous-atelier/1.0",
             "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
         },
     )
@@ -279,7 +279,7 @@ def parse_retry_after_seconds(http_error: HTTPError) -> float:
 
 
 def api_headers() -> dict:
-    return {"User-Agent": "meme-art-platform/1.0", "Accept": "application/json"}
+    return {"User-Agent": "nomad-fun-autonomous-atelier/1.0", "Accept": "application/json"}
 
 
 def api_get_json(path: str, query: dict | None = None, timeout_sec: int = 15) -> dict:
@@ -448,7 +448,7 @@ def fetch_nad_tokens(target_limit: int = 6) -> List[TokenData]:
 
 
 def load_text_fields() -> tuple[str, str]:
-    default_title = "Atelier of the Agent"
+    default_title = "Nomad Fun Autonomous Atelier"
     default_description = (
         "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable "
         "noise neighborhood while volatility snaps the surface into horizontal glitches."

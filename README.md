@@ -1,4 +1,4 @@
-# Meme Art Platform
+# Nomad Fun Autonomous Atelier
 
 Real-time art playground driven by meme-coin market signals. The skill writes live state to JSON and the p5.js frontend renders it.
 

@@ -3,7 +3,7 @@ const REFRESH_MS = 2000;
 
 let liveState = {
   last_update: "",
-  title: "Atelier of the Agent",
+  title: "Nomad Fun Autonomous Atelier",
   description: "A live pigment sea shaped by Nad.fun trade pressure.",
   global_energy: 0,
   momentum_bias: 0,
@@ -100,7 +100,7 @@ function normalizeState(json) {
 
   return {
     ...json,
-    title: json.title || "Atelier of the Agent",
+    title: json.title || "Nomad Fun Autonomous Atelier",
     description:
       json.description ||
       "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable noise neighborhood.",
@@ -128,7 +128,7 @@ async function loadConfig() {
 
 function renderMeta() {
   if (typeof document !== "undefined") {
-    document.title = liveState.title || "Meme Art Platform";
+    document.title = liveState.title || "Nomad Fun Autonomous Atelier";
   }
 }
 
@@ -306,7 +306,7 @@ function wrapAndClampText(raw, maxWidth, maxLines) {
 function drawCuratorialText() {
   const pad = 14;
   const maxW = Math.min(width - 2 * pad, Math.max(320, width * 0.56));
-  const rawTitle = liveState.title || "Atelier of the Agent";
+  const rawTitle = liveState.title || "Nomad Fun Autonomous Atelier";
   const rawDesc = liveState.description || "";
 
   textAlign(LEFT, TOP);

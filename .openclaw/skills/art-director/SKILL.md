@@ -1,9 +1,9 @@
 ---
-name: meme-art-director
+name: nomad-fun-autonomous-atelier
 description: Autonomous generative art director for Nad.fun market data. Use when the agent must continuously preprocess data into visual state, update artwork narrative text, monitor and analyze runtime errors, and evolve only process_data.py and frontend/sketch.js (never frontend/index.html).
 ---
 
-# Meme Art Director Skill
+# Nomad Fun Autonomous Atelier Skill
 
 ## Objective
 Run autonomously and continuously transform Nad.fun market activity into a single evolving square artwork, while maintaining curatorial text and self-correcting behavior based on logged warnings/errors.
