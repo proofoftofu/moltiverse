@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meme Art Platform</title>
+    <style>
+      :root {
+        --bg0: #0a1420;
+        --bg1: #12263d;
+        --fg: #f2f5f7;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        color: var(--fg);
+        background: radial-gradient(1200px 700px at 20% 10%, #194368, var(--bg0));
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+      }
+      main {
+        width: min(1000px, 96vw);
+        margin: 12px auto;
+      }
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        opacity: 0.9;
+      }
+      #canvas-container canvas {
+        width: 100%;
+        height: auto;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="hud">
+        <div>Meme Art Platform</div>
+        <div id="meta">Loading state...</div>
+      </div>
+      <div id="canvas-container"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+    <script src="./sketch.js"></script>
+  </body>
+</html>
+

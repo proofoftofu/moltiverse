@@ -1,0 +1,15 @@
+{
+  "last_update": "2026-02-13T08:45:00Z",
+  "style": "pixel-clusters",
+  "global_energy": 0.85,
+  "active_tokens": [
+    {
+      "symbol": "PEPE",
+      "palette": ["#43A047", "#1B5E20", "#FFFFFF"],
+      "coordinates": { "x": 120, "y": 450 },
+      "size": 45,
+      "energy": 0.85
+    }
+  ]
+}
+
