@@ -53,11 +53,20 @@ def append_error_log(line: str) -> None:
         pass
 
 
+def reset_error_log() -> None:
+    try:
+        ERROR_LOG_PATH.write_text("", encoding="utf-8")
+    except Exception:
+        # Do not fail processing if log reset fails.
+        pass
+
+
 def log(level: str, message: str) -> None:
     ts = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     line = f"[{ts}] [{level}] {message}"
     print(line)
-    if level == "ERROR":
+    # Persist warnings and errors for autonomous post-run analysis.
+    if level in {"WARN", "ERROR"}:
         append_error_log(line)
 
 
@@ -486,6 +495,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    reset_error_log()
     load_env_file(ROOT.parents[2] / ".env")
     log("INFO", "Loaded environment configuration.")
 

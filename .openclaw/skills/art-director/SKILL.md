@@ -6,7 +6,7 @@ description: Autonomous generative art director for Nad.fun market data. Use whe
 # Meme Art Director Skill
 
 ## Objective
-Run autonomously and continuously transform Nad.fun market activity into a single evolving square artwork, while maintaining curatorial text and self-correcting behavior based on logged errors.
+Run autonomously and continuously transform Nad.fun market activity into a single evolving square artwork, while maintaining curatorial text and self-correcting behavior based on logged warnings/errors.
 
 ## Execution Model
 - Do not wait for user prompts to trigger generation.
@@ -25,7 +25,7 @@ Run autonomously and continuously transform Nad.fun market activity into a singl
    - `noise_seed`, `noise_anchor`
    - `global_energy`
    - `title`, `description`
-5. Persist runtime errors to `.openclaw/skills/art-director/error.log`.
+5. Persist runtime warnings/errors to `.openclaw/skills/art-director/error.log`.
 6. In agent actions, inspect recent `error.log` entries and use them to guide corrective edits.
 
 ## Working Rules
@@ -34,7 +34,7 @@ Run autonomously and continuously transform Nad.fun market activity into a singl
 - Stop the process on data/image failures; do not invent synthetic fallback tokens.
 - Keep artwork square and studio presentation minimal.
 - Treat `title` and `description` as artwork interpretation, not system metadata.
-- Preserve an append-only error trail in `error.log` for debugging and analysis.
+- Preserve an append-only WARN/ERROR trail in `error.log` for debugging and analysis.
 
 ## Editable Surfaces
 Update these files whenever behavior or quality needs refinement:

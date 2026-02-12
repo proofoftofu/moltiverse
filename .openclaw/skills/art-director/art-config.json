@@ -1,8 +1,8 @@
 {
-  "last_update": "2026-02-12T21:20:40Z",
+  "last_update": "2026-02-12T21:28:39Z",
   "title": "Atelier of the Agent",
   "description": "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable noise neighborhood while volatility snaps the surface into horizontal glitches.",
-  "global_energy": 0.4778,
+  "global_energy": 0.4744,
   "active_tokens": [
     {
       "token_id": "0x350035555E10d9AfAF1566AaebfCeD5BA6C27777",
@@ -271,7 +271,7 @@
       ],
       "energy": 0.5025,
       "phase": 2.301279,
-      "frequency": 0.90865,
+      "frequency": 0.908637,
       "noise_seed": 15332161336626,
       "noise_anchor": {
         "u": 0.522152,
@@ -543,9 +543,9 @@
         "#B97EA5",
         "#B97EA5"
       ],
-      "energy": 0.6625,
+      "energy": 0.644,
       "phase": 2.879081,
-      "frequency": 1.140686,
+      "frequency": 1.113759,
       "noise_seed": 271951541845822,
       "noise_anchor": {
         "u": 0.033503,
@@ -817,9 +817,9 @@
         "#8879F6",
         "#8979F6"
       ],
-      "energy": 0.5346,
+      "energy": 0.5353,
       "phase": 1.872892,
-      "frequency": 0.955191,
+      "frequency": 0.956149,
       "noise_seed": 275017201729808,
       "noise_anchor": {
         "u": 0.425743,
@@ -1091,9 +1091,9 @@
         "#E5A443",
         "#E6A443"
       ],
-      "energy": 0.3183,
+      "energy": 0.3158,
       "phase": 5.323177,
-      "frequency": 0.641597,
+      "frequency": 0.637907,
       "noise_seed": 193372862884721,
       "noise_anchor": {
         "u": 0.564356,
@@ -1641,7 +1641,7 @@
       ],
       "energy": 0.5061,
       "phase": 2.677894,
-      "frequency": 0.913793,
+      "frequency": 0.91378,
       "noise_seed": 120721546042620,
       "noise_anchor": {
         "u": 0.922892,
