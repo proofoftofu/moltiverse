@@ -19,6 +19,7 @@ let qualityStep = 8;
 let showOverlay = true;
 let showGuides = true;
 let activeBuyContext = null;
+let activeBuySimulation = null;
 let artCanvasEl = null;
 
 function canvasDimensions() {
@@ -460,9 +461,66 @@ function computeBuySimulation(context, buyAmountRaw) {
   };
 }
 
+function drawBuySimulationPreview(t) {
+  if (!activeBuySimulation) return;
+
+  const cx = activeBuySimulation.click_u * width;
+  const cy = activeBuySimulation.click_v * height;
+  const amountScale = clamp(Math.log10(1 + Math.max(1, Number(activeBuySimulation.buy_amount || 1))) / 3, 0, 1.6);
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.4);
+  const radius = 70 + amountScale * 220 + pulse * 16;
+
+  const tokens = liveState._tokens || [];
+  const selected = tokens.find((tk) => String(tk.token_id) === String(activeBuySimulation.selected_token_id));
+  const baseColor = selected ? sampleGradientRGB(selected, 0.6) : [120, 180, 255];
+
+  drawingContext.save();
+  drawingContext.globalCompositeOperation = "screen";
+  const glow = drawingContext.createRadialGradient(cx, cy, radius * 0.08, cx, cy, radius);
+  glow.addColorStop(0, `rgba(${Math.floor(baseColor[0])}, ${Math.floor(baseColor[1])}, ${Math.floor(baseColor[2])}, 0.34)`);
+  glow.addColorStop(0.5, `rgba(${Math.floor(baseColor[0])}, ${Math.floor(baseColor[1])}, ${Math.floor(baseColor[2])}, 0.14)`);
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  drawingContext.fillStyle = glow;
+  drawingContext.fillRect(0, 0, width, height);
+  drawingContext.restore();
+
+  for (const impact of activeBuySimulation.impact_rows || []) {
+    const token = tokens.find((tk) => String(tk.token_id) === String(impact.token_id));
+    if (!token) continue;
+    const anchor = tokenAnchorPx(token);
+    const tokenColor = sampleGradientRGB(token, 0.58);
+    const tokenForce = clamp((impact.delta_energy + impact.delta_activity + impact.delta_momentum * 0.5) * 2.8, 0, 1.4);
+    const alpha = 30 + tokenForce * 120;
+
+    stroke(tokenColor[0], tokenColor[1], tokenColor[2], alpha);
+    strokeWeight(1 + tokenForce * 2.1);
+    line(cx, cy, anchor.x, anchor.y);
+
+    noFill();
+    stroke(tokenColor[0], tokenColor[1], tokenColor[2], 46 + tokenForce * 110);
+    circle(anchor.x, anchor.y, 18 + tokenForce * 42 + pulse * 6);
+  }
+
+  noFill();
+  stroke(baseColor[0], baseColor[1], baseColor[2], 180);
+  strokeWeight(2.2);
+  circle(cx, cy, radius * 0.55);
+  stroke(baseColor[0], baseColor[1], baseColor[2], 120);
+  strokeWeight(1.2);
+  circle(cx, cy, radius * 0.92);
+}
+
 if (typeof window !== "undefined") {
   window.computeBuySimulationFromCanvas = function computeBuySimulationFromCanvas(buyAmount) {
-    return computeBuySimulation(activeBuyContext, buyAmount);
+    const sim = computeBuySimulation(activeBuyContext, buyAmount);
+    if (sim) activeBuySimulation = sim;
+    return sim;
+  };
+  window.setBuySimulationPreview = function setBuySimulationPreview(sim) {
+    activeBuySimulation = sim || null;
+  };
+  window.clearBuySimulationPreview = function clearBuySimulationPreview() {
+    activeBuySimulation = null;
   };
 }
 
@@ -610,6 +668,7 @@ function drawDataSea(dt) {
   }
 
   drawInfluenceGuides(t);
+  drawBuySimulationPreview(t);
   drawDataOverlay();
   drawCuratorialText();
   cursor(pointInCanvas(mouseX, mouseY) ? HAND : ARROW);
@@ -684,6 +743,7 @@ function mousePressed(event) {
   };
 
   const simulation = computeBuySimulation(activeBuyContext, 100);
+  activeBuySimulation = simulation;
   if (typeof window !== "undefined" && typeof window.openBuySimulation === "function") {
     window.openBuySimulation(simulation);
   }

@@ -550,6 +550,9 @@
         }
         function closeBuyModal() {
           buyModal.classList.remove("open");
+          if (typeof window.clearBuySimulationPreview === "function") {
+            window.clearBuySimulationPreview();
+          }
         }
 
         function formatSigned(v) {
@@ -586,6 +589,9 @@
           const buyAmount = Number(buyAmountInput.value || 0);
           const sim = window.computeBuySimulationFromCanvas(buyAmount);
           renderBuySimulation(sim);
+          if (typeof window.setBuySimulationPreview === "function") {
+            window.setBuySimulationPreview(sim);
+          }
         }
 
         window.openBuySimulation = function openBuySimulation(sim) {
@@ -593,6 +599,9 @@
             buyAmountInput.value = String(Math.max(1, Math.round(sim.buy_amount)));
           }
           renderBuySimulation(sim);
+          if (typeof window.setBuySimulationPreview === "function") {
+            window.setBuySimulationPreview(sim);
+          }
           buyModal.classList.add("open");
         };
 
