@@ -232,6 +232,90 @@
         max-height: 82vh;
         background: rgba(9, 14, 25, 0.92);
       }
+      .buy-modal {
+        max-width: 560px;
+        background: rgba(9, 14, 25, 0.96);
+      }
+      .buy-body {
+        padding: 24px 22px 22px;
+        color: #d8e4f7;
+        font: 500 13px/1.55 Helvetica, Arial, sans-serif;
+      }
+      .buy-title {
+        margin: 0 0 8px;
+        font: 700 22px/1.2 Helvetica, Arial, sans-serif;
+        color: #edf4ff;
+      }
+      .buy-subtitle {
+        margin: 0 0 14px;
+        color: #b7c8df;
+      }
+      .buy-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .buy-stat {
+        border: 1px solid rgba(153, 181, 217, 0.24);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 8px 10px;
+      }
+      .buy-k {
+        font-size: 11px;
+        color: #9fb3d1;
+      }
+      .buy-v {
+        font: 700 14px/1.3 Helvetica, Arial, sans-serif;
+        color: #eff6ff;
+      }
+      .buy-control {
+        margin: 0 0 10px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(153, 181, 217, 0.24);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .buy-control label {
+        display: block;
+        margin-bottom: 8px;
+        color: #cfe0f6;
+        font: 600 12px/1.2 Helvetica, Arial, sans-serif;
+      }
+      .buy-control input[type="number"] {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid rgba(166, 191, 224, 0.45);
+        border-radius: 8px;
+        background: rgba(14, 23, 38, 0.9);
+        color: #ecf4ff;
+        padding: 8px 10px;
+        font: 600 13px/1.2 Helvetica, Arial, sans-serif;
+      }
+      .impact-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .impact-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 0;
+        border-top: 1px solid rgba(150, 173, 204, 0.14);
+      }
+      .impact-item:first-child {
+        border-top: none;
+      }
+      .impact-sym {
+        color: #dbeafe;
+        font-weight: 700;
+      }
+      .impact-delta {
+        color: #8ff0bb;
+        font: 600 12px/1.2 "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
       .source-body {
         padding: 18px 20px 20px;
         color: #d8e4f7;
@@ -286,6 +370,7 @@
       }
       #canvas-container canvas {
         display: block;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -361,6 +446,40 @@
         </div>
       </div>
     </div>
+    <div class="modal-backdrop" id="buy-modal" role="dialog" aria-modal="true" aria-labelledby="buy-title">
+      <div class="modal buy-modal">
+        <div class="modal-header">
+          <h2 id="buy-title">Buy Simulation</h2>
+          <button class="close-btn" id="close-buy-btn" type="button" aria-label="Close buy modal">×</button>
+        </div>
+        <div class="buy-body">
+          <h2 class="buy-title">Buy Simulation</h2>
+          <p class="buy-subtitle" id="buy-token-title">Select a point on canvas to simulate a token buy.</p>
+          <div class="buy-grid">
+            <div class="buy-stat">
+              <div class="buy-k">Clicked Point</div>
+              <div class="buy-v" id="buy-click-point">-</div>
+            </div>
+            <div class="buy-stat">
+              <div class="buy-k">Selected Token</div>
+              <div class="buy-v" id="buy-selected-token">-</div>
+            </div>
+          </div>
+          <div class="buy-control">
+            <label for="buy-amount-input">Buy Amount (simulation units)</label>
+            <input id="buy-amount-input" type="number" min="1" step="1" value="100" />
+          </div>
+          <section class="logic-block">
+            <h3>Projected Token Change</h3>
+            <p class="buy-subtitle" id="buy-selected-summary">No simulation yet.</p>
+          </section>
+          <section class="logic-block">
+            <h3>Nearby Impact</h3>
+            <ul class="impact-list" id="buy-impact-list"></ul>
+          </section>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
     <script src="./sketch.js"></script>
@@ -368,17 +487,25 @@
       (() => {
         const howModal = document.getElementById("how-modal");
         const sourceModal = document.getElementById("source-modal");
+        const buyModal = document.getElementById("buy-modal");
         const openHowBtn = document.getElementById("open-how-btn");
         const openSourceBtn = document.getElementById("open-source-btn");
         const closeHowBtn = document.getElementById("close-how-btn");
         const closeSourceBtn = document.getElementById("close-source-btn");
+        const closeBuyBtn = document.getElementById("close-buy-btn");
         const enterCanvasBtn = document.getElementById("enter-canvas-btn");
         const seeTokenBtn = document.getElementById("see-token-btn");
         const sketchSourceEl = document.getElementById("source-sketch");
         const processSourceEl = document.getElementById("source-process");
+        const buyTokenTitleEl = document.getElementById("buy-token-title");
+        const buyClickPointEl = document.getElementById("buy-click-point");
+        const buySelectedTokenEl = document.getElementById("buy-selected-token");
+        const buyAmountInput = document.getElementById("buy-amount-input");
+        const buySelectedSummaryEl = document.getElementById("buy-selected-summary");
+        const buyImpactListEl = document.getElementById("buy-impact-list");
         let sourceLoaded = false;
 
-        if (!howModal || !sourceModal || !openHowBtn || !openSourceBtn || !closeHowBtn || !closeSourceBtn || !enterCanvasBtn || !seeTokenBtn || !sketchSourceEl || !processSourceEl) return;
+        if (!howModal || !sourceModal || !buyModal || !openHowBtn || !openSourceBtn || !closeHowBtn || !closeSourceBtn || !closeBuyBtn || !enterCanvasBtn || !seeTokenBtn || !sketchSourceEl || !processSourceEl || !buyTokenTitleEl || !buyClickPointEl || !buySelectedTokenEl || !buyAmountInput || !buySelectedSummaryEl || !buyImpactListEl) return;
 
         function openHowModal() {
           howModal.classList.add("open");
@@ -421,25 +548,78 @@
         function closeSourceModal() {
           sourceModal.classList.remove("open");
         }
+        function closeBuyModal() {
+          buyModal.classList.remove("open");
+        }
+
+        function formatSigned(v) {
+          if (!Number.isFinite(v)) return "n/a";
+          const prefix = v >= 0 ? "+" : "";
+          return `${prefix}${v.toFixed(3)}`;
+        }
+
+        function renderBuySimulation(sim) {
+          if (!sim) return;
+          buyTokenTitleEl.textContent = `Buy near ${sim.selected_symbol || "token"} to preview projected market-art impact.`;
+          buyClickPointEl.textContent = `(${sim.click_u.toFixed(3)}, ${sim.click_v.toFixed(3)})`;
+          buySelectedTokenEl.textContent = `${sim.selected_symbol || "?"} (${sim.selected_token_id || "n/a"})`;
+          buySelectedSummaryEl.textContent = `Energy ${sim.selected_before.energy.toFixed(3)} -> ${sim.selected_after.energy.toFixed(3)}, Activity ${sim.selected_before.activity.toFixed(3)} -> ${sim.selected_after.activity.toFixed(3)}, Momentum ${sim.selected_before.momentum.toFixed(3)} -> ${sim.selected_after.momentum.toFixed(3)}`;
+
+          buyImpactListEl.textContent = "";
+          for (const item of sim.impact_rows || []) {
+            const li = document.createElement("li");
+            li.className = "impact-item";
+            const left = document.createElement("span");
+            left.className = "impact-sym";
+            left.textContent = item.symbol || "?";
+            const right = document.createElement("span");
+            right.className = "impact-delta";
+            right.textContent = `dE ${formatSigned(item.delta_energy)} | dA ${formatSigned(item.delta_activity)} | dM ${formatSigned(item.delta_momentum)}`;
+            li.appendChild(left);
+            li.appendChild(right);
+            buyImpactListEl.appendChild(li);
+          }
+        }
+
+        function refreshBuySimulationFromInput() {
+          if (typeof window.computeBuySimulationFromCanvas !== "function") return;
+          const buyAmount = Number(buyAmountInput.value || 0);
+          const sim = window.computeBuySimulationFromCanvas(buyAmount);
+          renderBuySimulation(sim);
+        }
+
+        window.openBuySimulation = function openBuySimulation(sim) {
+          if (sim && Number.isFinite(sim.buy_amount)) {
+            buyAmountInput.value = String(Math.max(1, Math.round(sim.buy_amount)));
+          }
+          renderBuySimulation(sim);
+          buyModal.classList.add("open");
+        };
 
         openHowBtn.addEventListener("click", openHowModal);
         openSourceBtn.addEventListener("click", openSourceModal);
         closeHowBtn.addEventListener("click", closeHowModal);
         closeSourceBtn.addEventListener("click", closeSourceModal);
+        closeBuyBtn.addEventListener("click", closeBuyModal);
         enterCanvasBtn.addEventListener("click", closeHowModal);
         seeTokenBtn.addEventListener("click", () => {
           window.open("https://nad.fun/", "_blank", "noopener,noreferrer");
         });
+        buyAmountInput.addEventListener("input", refreshBuySimulationFromInput);
         howModal.addEventListener("click", (e) => {
           if (e.target === howModal) closeHowModal();
         });
         sourceModal.addEventListener("click", (e) => {
           if (e.target === sourceModal) closeSourceModal();
         });
+        buyModal.addEventListener("click", (e) => {
+          if (e.target === buyModal) closeBuyModal();
+        });
         document.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             closeHowModal();
             closeSourceModal();
+            closeBuyModal();
           }
         });
       })();

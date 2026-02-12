@@ -18,7 +18,8 @@ let flowTime = 0;
 let qualityStep = 8;
 let showOverlay = true;
 let showGuides = true;
-let hoveredTokenId = "";
+let activeBuyContext = null;
+let artCanvasEl = null;
 
 function canvasDimensions() {
   const container = document.getElementById("canvas-container");
@@ -33,6 +34,7 @@ function setup() {
   const dims = canvasDimensions();
   const c = createCanvas(dims.w, dims.h);
   c.parent(container);
+  artCanvasEl = c && c.elt ? c.elt : null;
   pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
   textFont("Helvetica");
   noStroke();
@@ -360,6 +362,110 @@ function tokenAtPoint(px, py) {
   return null;
 }
 
+function nearestTokenAtPoint(px, py) {
+  const tokens = liveState._tokens || [];
+  if (tokens.length === 0) return null;
+  let nearest = null;
+  let bestDist = Infinity;
+  for (const token of tokens) {
+    const anchor = tokenAnchorPx(token);
+    const dist = Math.hypot(px - anchor.x, py - anchor.y);
+    if (dist < bestDist) {
+      bestDist = dist;
+      nearest = token;
+    }
+  }
+  return nearest;
+}
+
+function snapshotTokensForSimulation() {
+  const tokens = liveState._tokens || [];
+  return tokens.map((token) => ({
+    token_id: token.token_id,
+    symbol: token.symbol || "?",
+    energy: clamp(Number(token.energy || 0), 0, 1),
+    activity: clamp(Number(token.activity || 0), 0, 1),
+    momentum: clamp(Number(token.momentum || 0), -1, 1),
+    anchor_u: clamp(Number(token.anchor_u || 0.5), 0, 1),
+    anchor_v: clamp(Number(token.anchor_v || 0.5), 0, 1),
+  }));
+}
+
+function computeBuySimulation(context, buyAmountRaw) {
+  if (!context || !Array.isArray(context.tokens) || context.tokens.length === 0) return null;
+  const buyAmount = Math.max(1, Number(buyAmountRaw || 1));
+  const amountScale = clamp(Math.log10(1 + buyAmount) / 3, 0, 1.6);
+  const px = context.click_u * width;
+  const py = context.click_v * height;
+  const canvasScale = Math.max(1, Math.min(width, height));
+
+  const selected = context.tokens.find((t) => String(t.token_id) === String(context.selected_token_id));
+  if (!selected) return null;
+
+  const influenced = context.tokens.map((token) => {
+    const anchor = { x: token.anchor_u * width, y: token.anchor_v * height };
+    const dist = Math.hypot(px - anchor.x, py - anchor.y);
+    const nearFactor = clamp(1 - dist / (canvasScale * 0.9), 0, 1);
+    const selectedBoost = String(token.token_id) === String(context.selected_token_id) ? 1.45 : 0.55;
+    const spreadLift = 0.08 + context.energy_spread * 0.42;
+    const base = amountScale * (nearFactor * selectedBoost + spreadLift);
+
+    const deltaEnergy = clamp(base * 0.11, 0, 0.45);
+    const deltaActivity = clamp(base * 0.09, 0, 0.4);
+    const deltaMomentum = clamp(base * 0.22, 0, 0.8);
+
+    return {
+      token_id: token.token_id,
+      symbol: token.symbol,
+      delta_energy: deltaEnergy,
+      delta_activity: deltaActivity,
+      delta_momentum: deltaMomentum,
+      before: {
+        energy: token.energy,
+        activity: token.activity,
+        momentum: token.momentum,
+      },
+      after: {
+        energy: clamp(token.energy + deltaEnergy, 0, 1),
+        activity: clamp(token.activity + deltaActivity, 0, 1),
+        momentum: clamp(token.momentum + deltaMomentum, -1, 1),
+      },
+    };
+  });
+
+  const selectedRow = influenced.find((row) => String(row.token_id) === String(context.selected_token_id));
+  if (!selectedRow) return null;
+
+  const impactRows = influenced
+    .slice()
+    .sort((a, b) => (b.delta_energy + b.delta_activity) - (a.delta_energy + a.delta_activity))
+    .slice(0, 4)
+    .map((row) => ({
+      token_id: row.token_id,
+      symbol: row.symbol,
+      delta_energy: row.delta_energy,
+      delta_activity: row.delta_activity,
+      delta_momentum: row.delta_momentum,
+    }));
+
+  return {
+    buy_amount: buyAmount,
+    click_u: context.click_u,
+    click_v: context.click_v,
+    selected_token_id: context.selected_token_id,
+    selected_symbol: context.selected_symbol,
+    selected_before: selectedRow.before,
+    selected_after: selectedRow.after,
+    impact_rows: impactRows,
+  };
+}
+
+if (typeof window !== "undefined") {
+  window.computeBuySimulationFromCanvas = function computeBuySimulationFromCanvas(buyAmount) {
+    return computeBuySimulation(activeBuyContext, buyAmount);
+  };
+}
+
 function tokenInfluenceWeights(px, py) {
   const tokens = liveState._tokens || [];
   const weights = [];
@@ -506,10 +612,7 @@ function drawDataSea(dt) {
   drawInfluenceGuides(t);
   drawDataOverlay();
   drawCuratorialText();
-
-  const hovered = pointInCanvas(mouseX, mouseY) ? tokenAtPoint(mouseX, mouseY) : null;
-  hoveredTokenId = hovered && hovered.token_id ? String(hovered.token_id) : "";
-  cursor(hoveredTokenId ? HAND : ARROW);
+  cursor(pointInCanvas(mouseX, mouseY) ? HAND : ARROW);
 }
 
 function applyGlitchSnap(energy) {
@@ -557,10 +660,31 @@ function keyPressed() {
   }
 }
 
-function mousePressed() {
+function isAnyModalOpen() {
+  if (typeof document === "undefined") return false;
+  return Boolean(document.querySelector(".modal-backdrop.open"));
+}
+
+function mousePressed(event) {
+  if (isAnyModalOpen()) return;
+  if (event && event.target && artCanvasEl && event.target !== artCanvasEl) return;
   if (!pointInCanvas(mouseX, mouseY)) return;
-  const token = tokenAtPoint(mouseX, mouseY);
+  const token = nearestTokenAtPoint(mouseX, mouseY);
   if (!token || !token.token_id) return;
-  const url = `https://nad.fun/tokens/${encodeURIComponent(String(token.token_id))}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+
+  activeBuyContext = {
+    selected_token_id: token.token_id,
+    selected_symbol: token.symbol || "?",
+    click_u: clamp(mouseX / Math.max(1, width), 0, 1),
+    click_v: clamp(mouseY / Math.max(1, height), 0, 1),
+    global_energy: liveState.global_energy,
+    momentum_bias: liveState.momentum_bias,
+    energy_spread: liveState.energy_spread,
+    tokens: snapshotTokensForSimulation(),
+  };
+
+  const simulation = computeBuySimulation(activeBuyContext, 100);
+  if (typeof window !== "undefined" && typeof window.openBuySimulation === "function") {
+    window.openBuySimulation(simulation);
+  }
 }
