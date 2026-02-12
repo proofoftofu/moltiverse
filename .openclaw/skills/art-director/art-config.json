@@ -1,15 +1,35 @@
 {
-  "last_update": "2026-02-13T08:45:00Z",
+  "last_update": "2026-02-12T20:11:50Z",
   "style": "pixel-clusters",
-  "global_energy": 0.85,
+  "global_energy": 0.6865,
   "active_tokens": [
     {
       "symbol": "PEPE",
-      "palette": ["#43A047", "#1B5E20", "#FFFFFF"],
-      "coordinates": { "x": 120, "y": 450 },
-      "size": 45,
-      "energy": 0.85
+      "palette": [
+        "#E5EAE9",
+        "#383813",
+        "#8C825A"
+      ],
+      "coordinates": {
+        "x": 581,
+        "y": 569
+      },
+      "size": 52,
+      "energy": 0.5437
+    },
+    {
+      "symbol": "DOGE",
+      "palette": [
+        "#E4DEDB",
+        "#ABA9A3",
+        "#505854"
+      ],
+      "coordinates": {
+        "x": 666,
+        "y": 568
+      },
+      "size": 69,
+      "energy": 0.8293
     }
   ]
 }
-

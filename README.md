@@ -5,7 +5,7 @@ Real-time art playground driven by meme-coin market signals. The skill writes li
 ## Structure
 
 ```text
-meme-art-platform/
+.
 ├── .openclaw/
 │   └── skills/
 │       └── art-director/
@@ -32,26 +32,28 @@ pip install pillow scikit-learn numpy
 ```
 
 3. Fill in `.env` values.
+   - Set `NAD_NETWORK=mainnet` (or `testnet`).
+   - By default, token IDs are auto-discovered from `https://nad.fun` Trending cards.
+   - Optional override: set `NAD_TOKEN_IDS` (comma-separated), or set `NAD_ACCOUNT_ID` as fallback source.
+   - Set `NAD_API_KEY` for higher rate limits.
 
 ## Run
 
 1. Generate one config update:
 
 ```bash
-cd .openclaw/skills/art-director
-python3 scripts/process_data.py
+python3 .openclaw/skills/art-director/scripts/process_data.py
 ```
 
 2. Run stream loop:
 
 ```bash
-python3 scripts/process_data.py --loop --interval 2
+python3 .openclaw/skills/art-director/scripts/process_data.py --loop --interval 2
 ```
 
 3. Serve frontend:
 
 ```bash
-cd ../../..
 python3 -m http.server 8080
 ```
 
@@ -66,4 +68,3 @@ python3 -m http.server 8080
 - `Change style to voronoi`
 - `Change style to minimal`
 - `What's the vibe?`
-
