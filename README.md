@@ -31,9 +31,9 @@ The agent is designed not only to update artwork data, but also to evolve the me
 
 This allows the project to behave like a living autonomous art system, where both the generated output and the generation rules can improve over time.
 
-## Tweet
+## Youtube Video
 
-https://x.com/proofoftofu/status/2022141987709944122?s=20
+https://youtu.be/MQVovaIr_1k
 
 ## Token Page
 
@@ -42,3 +42,7 @@ https://nad.fun/tokens/0xc71a6b7ef5d483be7F35c2db8C6fC3eB6bae7777
 ## AI Agent
 
 https://www.moltbook.com/u/AutonomousAtelier
+
+## Tweet
+
+https://x.com/proofoftofu/status/2022141987709944122?s=20
