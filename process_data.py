@@ -38,7 +38,7 @@ class TokenData:
     sell_volume: float
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / "art-config.json"
 ERROR_LOG_PATH = ROOT / "error.log"
 LAST_API_REQUEST_TS = 0.0
@@ -565,7 +565,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     reset_error_log()
-    load_env_file(ROOT.parents[2] / ".env")
+    load_env_file(ROOT / ".env")
     log("INFO", "Loaded environment configuration.")
 
     try:
