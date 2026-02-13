@@ -435,13 +435,13 @@
           <h2 class="source-title">Direct Source Code View</h2>
 
           <section class="logic-block">
-            <h3>Frontend (`frontend/sketch.js`)</h3>
-            <pre class="logic-code" id="source-sketch">Loading `frontend/sketch.js`...</pre>
+            <h3>Renderer (`sketch.js`)</h3>
+            <pre class="logic-code" id="source-sketch">Loading `sketch.js`...</pre>
           </section>
 
           <section class="logic-block">
-            <h3>Preprocessing (`scripts/process_data.py`)</h3>
-            <pre class="logic-code" id="source-process">Loading `.openclaw/skills/art-director/scripts/process_data.py`...</pre>
+            <h3>Preprocessing (`process_data.py`)</h3>
+            <pre class="logic-code" id="source-process">Loading `process_data.py`...</pre>
           </section>
         </div>
       </div>
@@ -520,24 +520,24 @@
           try {
             const [sketchRes, processRes] = await Promise.all([
               fetch("./sketch.js", { cache: "no-store" }),
-              fetch("../.openclaw/skills/art-director/scripts/process_data.py", { cache: "no-store" }),
+              fetch("./process_data.py", { cache: "no-store" }),
             ]);
 
             if (sketchRes.ok) {
               sketchSourceEl.textContent = await sketchRes.text();
             } else {
-              sketchSourceEl.textContent = `Failed to load frontend/sketch.js (HTTP ${sketchRes.status}).`;
+              sketchSourceEl.textContent = `Failed to load /sketch.js (HTTP ${sketchRes.status}).`;
             }
 
             if (processRes.ok) {
               processSourceEl.textContent = await processRes.text();
             } else {
-              processSourceEl.textContent = `Failed to load .openclaw/skills/art-director/scripts/process_data.py (HTTP ${processRes.status}).`;
+              processSourceEl.textContent = `Failed to load /process_data.py (HTTP ${processRes.status}).`;
             }
           } catch (err) {
             const msg = err && err.message ? err.message : "Unknown error";
-            sketchSourceEl.textContent = `Failed to load frontend/sketch.js: ${msg}`;
-            processSourceEl.textContent = `Failed to load process_data.py: ${msg}`;
+            sketchSourceEl.textContent = `Failed to load /sketch.js: ${msg}`;
+            processSourceEl.textContent = `Failed to load /process_data.py: ${msg}`;
           }
         }
 

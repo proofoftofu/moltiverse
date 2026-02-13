@@ -3,7 +3,7 @@
 Fetch token imagery/trade data, derive palette + energy, and write art-config.json.
 
 Usage:
-  python3 scripts/process_data.py
+  python3 process_data.py
 """
 
 from __future__ import annotations

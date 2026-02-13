@@ -1,4 +1,4 @@
-const CONFIG_URL = "../.openclaw/skills/art-director/art-config.json";
+const CONFIG_URL = "./art-config.json";
 const REFRESH_MS = 2000;
 
 let liveState = {
