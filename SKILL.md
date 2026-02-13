@@ -11,6 +11,7 @@ Run autonomously and continuously transform Nad.fun market activity into a singl
 ## Execution Model
 - Do not wait for user prompts to trigger generation.
 - Run one autonomous cycle per invocation (`python3 process_data.py`) under OpenClaw scheduling/automation.
+- Demo phase cadence: run the autonomous update every 30 minutes.
 - Treat each cycle as: fetch -> preprocess -> render-state update -> error review.
 
 ## Logic Flow
