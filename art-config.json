@@ -1,10 +1,10 @@
 {
-  "last_update": "2026-02-13T06:14:56Z",
-  "title": "Incandescent Tide: MMO",
-  "description": "Buyers turn the current outward, lifting bright filaments from each anchor; volatility tears the surface into hard crosscurrents and electric seams. Sampled token palettes diffuse through anchored noise neighborhoods beneath a dusk vignette.",
-  "global_energy": 0.6623,
-  "momentum_bias": 0.3245,
-  "energy_spread": 0.3069,
+  "last_update": "2026-02-13T06:46:23Z",
+  "title": "Velvet Friction: EMO",
+  "description": "Bid and ask braid together, keeping the sea in a tense suspended drift; volatility tears the surface into hard crosscurrents and electric seams. Sampled token palettes diffuse through anchored noise neighborhoods beneath a dusk vignette.",
+  "global_energy": 0.5698,
+  "momentum_bias": 0.1397,
+  "energy_spread": 0.3314,
   "active_tokens": [
     {
       "token_id": "0x350035555E10d9AfAF1566AaebfCeD5BA6C27777",
@@ -112,18 +112,18 @@
         "#E2D9C3",
         "#E5DDC4"
       ],
-      "energy": 0.9515,
-      "momentum": 0.9031,
-      "activity": 0.5108,
+      "energy": 0.9464,
+      "momentum": 0.8928,
+      "activity": 0.4588,
       "phase": 2.301279,
-      "frequency": 1.559732,
+      "frequency": 1.552284,
       "noise_seed": 15332161336626,
       "noise_anchor": {
         "u": 0.522152,
         "v": 0.386839
       },
-      "buy_volume": 1.2367330053192852e+23,
-      "sell_volume": 6.298478896973913e+21
+      "buy_volume": 1.0908810826795982e+23,
+      "sell_volume": 6.17796528334888e+21
     },
     {
       "token_id": "0x405b6330e213DED490240CbcDD64790806827777",
@@ -231,18 +231,18 @@
         "#B87DA4",
         "#B97EA5"
       ],
-      "energy": 0.7566,
-      "momentum": 0.5132,
-      "activity": 0.7994,
+      "energy": 0.3336,
+      "momentum": -0.3328,
+      "activity": 0.923,
       "phase": 2.879081,
-      "frequency": 1.277064,
+      "frequency": 0.663703,
       "noise_seed": 271951541845822,
       "noise_anchor": {
         "u": 0.033503,
         "v": 0.957596
       },
-      "buy_volume": 1.5388893999329355e+23,
-      "sell_volume": 4.950762643028922e+22
+      "buy_volume": 7.735035081448543e+22,
+      "sell_volume": 1.5452345403823726e+23
     },
     {
       "token_id": "0x91ce820dD39A2B5639251E8c7837998530Fe7777",
@@ -350,18 +350,18 @@
         "#8878F5",
         "#8979F6"
       ],
-      "energy": 0.8776,
-      "momentum": 0.7551,
-      "activity": 0.016,
+      "energy": 0.8774,
+      "momentum": 0.7548,
+      "activity": 0.0162,
       "phase": 1.872892,
-      "frequency": 1.452451,
+      "frequency": 1.452205,
       "noise_seed": 275017201729808,
       "noise_anchor": {
         "u": 0.425743,
         "v": 0.230223
       },
-      "buy_volume": 3.572604996999999e+21,
-      "sell_volume": 4.984966511782848e+20
+      "buy_volume": 3.566980858999999e+21,
+      "sell_volume": 4.984966538402881e+20
     },
     {
       "token_id": "0xF383a61f1a68ee4A77a1b7F57D8f2d948B5f7777",
@@ -469,18 +469,18 @@
         "#E4A343",
         "#E6A443"
       ],
-      "energy": 0.3182,
-      "momentum": -0.3636,
-      "activity": 1.0,
+      "energy": 0.2319,
+      "momentum": -0.5362,
+      "activity": 0.9433,
       "phase": 5.323177,
-      "frequency": 0.641412,
+      "frequency": 0.516239,
       "noise_seed": 193372862884721,
       "noise_anchor": {
         "u": 0.564356,
         "v": 0.592059
       },
-      "buy_volume": 8.096739310107514e+22,
-      "sell_volume": 1.7347499121600945e+23
+      "buy_volume": 5.4953562772145105e+22,
+      "sell_volume": 1.8202883486471235e+23
     },
     {
       "token_id": "0x81A224F8A62f52BdE942dBF23A56df77A10b7777",
@@ -588,18 +588,18 @@
         "#D8D6D8",
         "#DBDADB"
       ],
-      "energy": 0.906,
-      "momentum": 0.812,
-      "activity": 0.8831,
+      "energy": 0.8658,
+      "momentum": 0.7316,
+      "activity": 1.0,
       "phase": 1.78499,
-      "frequency": 1.493711,
+      "frequency": 1.435442,
       "noise_seed": 144825465328409,
       "noise_anchor": {
         "u": 0.393939,
         "v": 0.227023
       },
-      "buy_volume": 2.0358874222949396e+23,
-      "sell_volume": 2.1121067745580757e+22
+      "buy_volume": 2.1750769723717593e+23,
+      "sell_volume": 3.3707455704201867e+22
     },
     {
       "token_id": "0x29E8a68e6F5275c36767ae531B9f6b5953Ba7777",
@@ -707,18 +707,18 @@
         "#6E7570",
         "#6C736E"
       ],
-      "energy": 0.1637,
-      "momentum": -0.6726,
-      "activity": 0.4109,
+      "energy": 0.1639,
+      "momentum": -0.6723,
+      "activity": 0.4158,
       "phase": 3.318653,
-      "frequency": 0.417401,
+      "frequency": 0.417616,
       "noise_seed": 195191746752818,
       "noise_anchor": {
         "u": 0.075308,
         "v": 0.433443
       },
-      "buy_volume": 1.7117433622e+22,
-      "sell_volume": 8.743264050931035e+22
+      "buy_volume": 1.7118189822000004e+22,
+      "sell_volume": 8.734190474741634e+22
     }
   ]
 }
