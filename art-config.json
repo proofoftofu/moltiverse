@@ -1,10 +1,10 @@
 {
-  "last_update": "2026-02-13T01:01:13Z",
-  "title": "Velvet Friction: MONCOCK",
+  "last_update": "2026-02-13T03:04:02Z",
+  "title": "Velvet Friction: MMO",
   "description": "Bid and ask braid together, keeping the sea in a tense suspended drift; volatility ripples the mid-tones into visible grain and lateral slips. Sampled token palettes diffuse through anchored noise neighborhoods beneath a dusk vignette.",
-  "global_energy": 0.4787,
-  "momentum_bias": -0.0425,
-  "energy_spread": 0.1651,
+  "global_energy": 0.4515,
+  "momentum_bias": -0.0971,
+  "energy_spread": 0.1811,
   "active_tokens": [
     {
       "token_id": "0x350035555E10d9AfAF1566AaebfCeD5BA6C27777",
@@ -112,18 +112,18 @@
         "#E2D9C3",
         "#E5DDC4"
       ],
-      "energy": 0.5024,
-      "momentum": 0.0049,
-      "activity": 0.1545,
+      "energy": 0.3597,
+      "momentum": -0.2807,
+      "activity": 0.3014,
       "phase": 2.301279,
-      "frequency": 0.908528,
+      "frequency": 0.701524,
       "noise_seed": 15332161336626,
       "noise_anchor": {
         "u": 0.522152,
         "v": 0.386839
       },
-      "buy_volume": 1.4308656530632477e+22,
-      "sell_volume": 1.417005813581032e+22
+      "buy_volume": 3.5906877211189854e+22,
+      "sell_volume": 6.392544785722446e+22
     },
     {
       "token_id": "0xF383a61f1a68ee4A77a1b7F57D8f2d948B5f7777",
@@ -231,18 +231,18 @@
         "#E4A343",
         "#E6A443"
       ],
-      "energy": 0.2298,
-      "momentum": -0.5404,
-      "activity": 0.6571,
+      "energy": 0.5351,
+      "momentum": 0.0702,
+      "activity": 1.0,
       "phase": 5.323177,
-      "frequency": 0.513175,
+      "frequency": 0.955864,
       "noise_seed": 193372862884721,
       "noise_anchor": {
         "u": 0.564356,
         "v": 0.592059
       },
-      "buy_volume": 2.7835522013859955e+22,
-      "sell_volume": 9.33064456660397e+22
+      "buy_volume": 1.7720959921990985e+23,
+      "sell_volume": 1.5397443434056432e+23
     },
     {
       "token_id": "0x405b6330e213DED490240CbcDD64790806827777",
@@ -350,18 +350,18 @@
         "#B87DA4",
         "#B97EA5"
       ],
-      "energy": 0.2912,
-      "momentum": -0.4177,
-      "activity": 1.0,
+      "energy": 0.2097,
+      "momentum": -0.5806,
+      "activity": 0.62,
       "phase": 2.879081,
-      "frequency": 0.602168,
+      "frequency": 0.484049,
       "noise_seed": 271951541845822,
       "noise_anchor": {
         "u": 0.033503,
         "v": 0.957596
       },
-      "buy_volume": 5.367229020929854e+22,
-      "sell_volume": 1.3067351966924671e+23
+      "buy_volume": 4.305611702816523e+22,
+      "sell_volume": 1.6227719649916173e+23
     },
     {
       "token_id": "0xb12F3D5400C0e798a3233A003639a24810837777",
@@ -469,18 +469,18 @@
         "#F7AB16",
         "#FAAD13"
       ],
-      "energy": 0.666,
-      "momentum": 0.332,
-      "activity": 0.251,
+      "energy": 0.7581,
+      "momentum": 0.5162,
+      "activity": 0.131,
       "phase": 0.792749,
-      "frequency": 1.145729,
+      "frequency": 1.279256,
       "noise_seed": 199312590512617,
       "noise_anchor": {
         "u": 0.668967,
         "v": 0.9957
       },
-      "buy_volume": 3.082098023909643e+22,
-      "sell_volume": 1.545536218564458e+22
+      "buy_volume": 3.2893014779457264e+22,
+      "sell_volume": 1.0495293309822916e+22
     },
     {
       "token_id": "0x91ce820dD39A2B5639251E8c7837998530Fe7777",
@@ -590,7 +590,7 @@
       ],
       "energy": 0.5398,
       "momentum": 0.0795,
-      "activity": 0.0076,
+      "activity": 0.0042,
       "phase": 1.872892,
       "frequency": 0.962659,
       "noise_seed": 275017201729808,
@@ -707,18 +707,18 @@
         "#7BA49F",
         "#7CA6A0"
       ],
-      "energy": 0.6432,
-      "momentum": 0.2865,
-      "activity": 0.9032,
+      "energy": 0.3065,
+      "momentum": -0.3869,
+      "activity": 0.3829,
       "phase": 3.724232,
-      "frequency": 1.112679,
+      "frequency": 0.62447,
       "noise_seed": 11071495259273,
       "noise_anchor": {
         "u": 0.835684,
         "v": 0.991299
       },
-      "buy_volume": 1.0709460829716523e+23,
-      "sell_volume": 5.9401232119470615e+22
+      "buy_volume": 3.887473944961547e+22,
+      "sell_volume": 8.794673041955615e+22
     }
   ]
 }
