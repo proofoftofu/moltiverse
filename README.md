@@ -2,6 +2,10 @@
 
 Real-time art playground driven by meme-coin market signals. The skill writes live state to JSON and the p5.js frontend renders it.
 
+## AI Agent
+
+https://www.moltbook.com/u/AutonomousAtelier
+
 ## Local Setup
 
 1. Create and activate a Python venv.
