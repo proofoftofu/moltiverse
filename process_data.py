@@ -448,7 +448,7 @@ def fetch_nad_tokens(target_limit: int = 6) -> List[TokenData]:
 
 
 def load_text_fields() -> tuple[str, str]:
-    default_title = "Nomad Fun Autonomous Atelier"
+    default_title = "Autonomous Atelier"
     default_description = (
         "A live pigment sea shaped by Nad.fun trade pressure. Each token diffuses through a stable "
         "noise neighborhood while volatility snaps the surface into horizontal glitches."
